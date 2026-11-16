@@ -1,0 +1,219 @@
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
+import AppIcon from '../components/AppIcon.vue';
+import DayStrip from '../components/DayStrip.vue';
+import NextUpBar from '../components/NextUpBar.vue';
+import PlaceSheet from '../components/PlaceSheet.vue';
+import RouteLegRow from '../components/RouteLegRow.vue';
+import RouteStopRow from '../components/RouteStopRow.vue';
+import TimeControl from '../components/TimeControl.vue';
+import { CITY_NAMES, TRIP_DAYS } from '../data/trip';
+import { useProgress } from '../composables/useProgress';
+import { useTripClock } from '../composables/useTripClock';
+import { hasBackEntry } from '../lib/history';
+import { buildRoute, clampDayIndex, dayStartMinutes } from '../lib/route';
+import type { StopRow } from '../lib/route';
+import skylineShanghai from '../assets/art/skyline-shanghai.png';
+import skylineHongKong from '../assets/art/skyline-hongkong.png';
+import eggTart from '../assets/art/eggtart.png';
+import dimSum from '../assets/art/dimsum.png';
+import eggWaffle from '../assets/art/eggwaffle.png';
+
+const SKYLINES = {
+  sh: skylineShanghai,
+  hk: skylineHongKong
+};
+
+const route = useRoute();
+const router = useRouter();
+const clock = useTripClock();
+const { visited, toggleVisited } = useProgress();
+
+const manualMinutes = ref<number | null>(null);
+
+const dayIndex = computed(() => clampDayIndex(Number(route.params.number) - 1));
+const day = computed(() => TRIP_DAYS[dayIndex.value]!);
+const cityName = computed(() => CITY_NAMES[day.value.city]);
+const isLive = computed(() => clock.value.dayIndex === dayIndex.value);
+const minutes = computed(() => manualMinutes.value ?? (isLive.value ? clock.value.minutes : dayStartMinutes(dayIndex.value)));
+const dayRoute = computed(() => buildRoute(dayIndex.value, minutes.value, visited.value));
+const homeTarget = computed(() => `hotel-${day.value.city}`);
+
+const summary = computed(() => {
+  const { counts, withHours } = dayRoute.value;
+
+  if (!withHours) {
+    return 'No opening hours in the plan for today.';
+  }
+
+  const parts = [
+    counts.open ? `${counts.open} open` : '',
+    counts.soon ? `${counts.soon} closing soon` : '',
+    counts.later ? `${counts.later} not open yet` : '',
+    counts.closed ? `${counts.closed} closed` : ''
+  ];
+
+  return `${parts.filter(Boolean).join(' · ')} (places with hours in the plan)`;
+});
+
+const openRow = computed(() => {
+  const id = route.query.stop;
+
+  if (typeof id !== 'string') {
+    return null;
+  }
+
+  return dayRoute.value.rows.find((row): row is StopRow => row.kind === 'stop' && row.id === id) ?? null;
+});
+
+const sheetKicker = computed(() => {
+  const at = openRow.value?.at;
+  const base = `day ${dayIndex.value + 1} · ${day.value.weekday} ${day.value.date} Dec`;
+
+  return at ? `${base} · ${at}` : base;
+});
+
+function openStop (id: string) {
+  router.push({ query: { stop: id } });
+}
+
+function closeStop () {
+  if (hasBackEntry()) {
+    router.back();
+    return;
+  }
+
+  router.replace({ query: {} });
+}
+
+function setMinutes (value: number) {
+  manualMinutes.value = value;
+}
+
+watch(dayIndex, () => {
+  manualMinutes.value = null;
+});
+</script>
+
+<template>
+  <main class="mx-auto max-w-md px-4 pb-44">
+    <header class="sticky top-0 z-20 -mx-4 flex items-center justify-between bg-paper/90 px-2 pb-2 pt-[max(8px,env(safe-area-inset-top))] backdrop-blur-md">
+      <RouterLink
+        to="/"
+        class="flex h-11 items-center gap-1 rounded-full pl-1 pr-3 font-semibold"
+      >
+        <AppIcon name="back" />
+        All days
+      </RouterLink>
+      <RouterLink
+        :to="`/taxi/${homeTarget}`"
+        class="flex h-11 items-center gap-2 rounded-full bg-card px-4 text-sm font-semibold"
+      >
+        <AppIcon
+          name="home"
+          :size="18"
+          class="text-accent-ink"
+        />
+        Our hotel
+      </RouterLink>
+    </header>
+
+    <section class="pt-2">
+      <img
+        :src="SKYLINES[day.city]"
+        alt=""
+        class="-mb-3 ml-auto block w-52"
+      >
+      <p class="font-hand text-[26px] leading-none text-accent-ink">
+        day {{ dayIndex + 1 }} · {{ day.weekday }} {{ day.date }} Dec
+      </p>
+      <h1 class="mt-2 text-[40px] font-extrabold leading-[1.02] tracking-tight">{{ day.title }}</h1>
+      <p class="mt-2 text-[15px] leading-snug text-muted">{{ day.areas }}</p>
+    </section>
+
+    <DayStrip
+      class="mt-6"
+      :active-index="dayIndex"
+    />
+
+    <TimeControl
+      class="mt-4"
+      :minutes="minutes"
+      :live="isLive"
+      :manual="manualMinutes !== null"
+      :city-name="cityName"
+      :summary="summary"
+      @change="setMinutes"
+      @reset="manualMinutes = null"
+    />
+
+    <p
+      v-if="day.headsUp"
+      class="mt-5 flex gap-3 rounded-3xl bg-tint/70 px-5 py-4"
+    >
+      <span class="sr-only">Heads up:</span>
+      <span class="font-hand text-[23px] leading-[1.15]">{{ day.headsUp }}</span>
+    </p>
+
+    <ol
+      class="mt-6"
+      aria-label="Today’s route"
+    >
+      <template
+        v-for="row in dayRoute.rows"
+        :key="row.id"
+      >
+        <RouteLegRow
+          v-if="row.kind === 'leg'"
+          :row="row"
+        />
+        <RouteStopRow
+          v-else
+          :row="row"
+          @toggle="toggleVisited(row.id)"
+          @open="openStop(row.id)"
+        />
+      </template>
+    </ol>
+
+    <div
+      v-if="day.city === 'hk'"
+      class="mt-8 flex items-end justify-center gap-4"
+      aria-hidden="true"
+    >
+      <img
+        :src="eggTart"
+        alt=""
+        class="w-20"
+      >
+      <img
+        :src="dimSum"
+        alt=""
+        class="w-28"
+      >
+      <img
+        :src="eggWaffle"
+        alt=""
+        class="w-12"
+      >
+    </div>
+  </main>
+
+  <NextUpBar
+    :next="dayRoute.next"
+    :home-target="homeTarget"
+    @tick="toggleVisited"
+    @open="openStop"
+  />
+
+  <Transition name="sheet">
+    <PlaceSheet
+      v-if="openRow"
+      :row="openRow"
+      :kicker="sheetKicker"
+      @close="closeStop"
+      @toggle="toggleVisited(openRow.id)"
+    />
+  </Transition>
+</template>

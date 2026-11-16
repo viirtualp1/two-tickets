@@ -1,0 +1,158 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Bricolage Grotesque", "PingFang SC", "PingFang TC", "Hiragino Sans GB", "Noto Sans SC", system-ui, sans-serif;
+  --font-hand: "Caveat", "Bricolage Grotesque", cursive;
+  --color-ink: #1e1a2b;
+  --color-muted: #5d5869;
+  --color-open: #2c6a3a;
+  --color-soon: #a04d0d;
+  --color-card: #ffffff;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-tint: var(--tint);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-line: var(--line);
+}
+
+:root {
+  --paper: #fff6f3;
+  --tint: #fbe2dc;
+  --accent: #c53a30;
+  --accent-ink: #b0322a;
+  --line: #efd8d2;
+  color-scheme: light;
+}
+
+:root[data-city="hk"] {
+  --paper: #f1f7f3;
+  --tint: #d7ece2;
+  --accent: #1d7563;
+  --accent-ink: #17614f;
+  --line: #d3e5dc;
+}
+
+html {
+  background: var(--paper);
+  transition: background-color 0.5s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2.5px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* A ticket with a perforated stub: round bites out of the top and bottom edge at --cut. */
+.ticket {
+  --notch: 11px;
+  --cut: 88px;
+  -webkit-mask:
+    radial-gradient(circle var(--notch) at var(--cut) 0, #0000 98%, #000) top / 100% 51% no-repeat,
+    radial-gradient(circle var(--notch) at var(--cut) 100%, #0000 98%, #000) bottom / 100% 51% no-repeat;
+  mask:
+    radial-gradient(circle var(--notch) at var(--cut) 0, #0000 98%, #000) top / 100% 51% no-repeat,
+    radial-gradient(circle var(--notch) at var(--cut) 100%, #0000 98%, #000) bottom / 100% 51% no-repeat;
+}
+
+/* The same ticket turned on its side: bites out of the left and right edge at --cut from the top. */
+.ticket-tall {
+  --notch: 13px;
+  -webkit-mask:
+    radial-gradient(circle var(--notch) at 0 var(--cut), #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--notch) at 100% var(--cut), #0000 98%, #000) right / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle var(--notch) at 0 var(--cut), #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--notch) at 100% var(--cut), #0000 98%, #000) right / 51% 100% no-repeat;
+}
+
+.lift {
+  filter: drop-shadow(0 1px 0 rgb(30 26 43 / 0.05)) drop-shadow(0 8px 18px rgb(120 70 60 / 0.08));
+}
+
+.time-range {
+  appearance: none;
+  width: 100%;
+  height: 44px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.time-range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--tint);
+}
+
+.time-range::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--tint);
+}
+
+.time-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  margin-top: -10px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--accent);
+  box-shadow: 0 2px 6px rgb(30 26 43 / 0.15);
+}
+
+.time-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--accent);
+}
+
+@keyframes breathe {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 35%, transparent); }
+  50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--accent) 0%, transparent); }
+}
+
+.breathe {
+  animation: breathe 2.4s ease-in-out infinite;
+}
+
+.sheet-enter-active,
+.sheet-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.sheet-enter-active .sheet-panel,
+.sheet-leave-active .sheet-panel {
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.sheet-enter-from,
+.sheet-leave-to {
+  opacity: 0;
+}
+
+.sheet-enter-from .sheet-panel,
+.sheet-leave-to .sheet-panel {
+  transform: translateY(100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
