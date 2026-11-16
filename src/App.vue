@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
+import ChecklistReminder from './components/ChecklistReminder.vue';
 import { TRIP_DAYS } from './data/trip';
 import { useTripClock } from './composables/useTripClock';
 import { clampDayIndex, findPlace } from './lib/route';
@@ -35,4 +36,5 @@ watch(city, value => {
 
 <template>
   <RouterView />
+  <ChecklistReminder />
 </template>

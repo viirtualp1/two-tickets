@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-export type IconName = 'metro' | 'walk' | 'flight' | 'transfer' | 'home' | 'back' | 'forward' | 'close' | 'check' | 'pin' | 'copy' | 'talk' | 'heart' | 'clock';
+export type IconName = 'metro' | 'walk' | 'flight' | 'transfer' | 'home' | 'back' | 'forward' | 'close' | 'check' | 'pin' | 'copy' | 'talk' | 'heart' | 'clock' | 'plus' | 'edit';
 
 const props = withDefaults(defineProps<{
   name: IconName;
@@ -28,7 +28,9 @@ const PATHS: Record<IconName, string> = {
   copy: '<rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6.5A2.5 2.5 0 0 0 13.5 4h-7A2.5 2.5 0 0 0 4 6.5v7A2.5 2.5 0 0 0 6.5 16H8"/>',
   talk: '<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-5 4z"/>',
   heart: '<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
-  clock: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>'
+  clock: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  edit: '<path d="m13.5 6.5 4 4M4 20l4.5-1 11-11a2.8 2.8 0 0 0-4-4l-11 11L4 20z"/>'
 };
 
 const markup = computed(() => PATHS[props.name]);

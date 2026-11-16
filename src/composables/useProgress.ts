@@ -55,10 +55,6 @@ function toggleVisited (id: string) {
   flip(visited, id);
 }
 
-function togglePrep (id: string) {
-  flip(prep, id);
-}
-
 export function useProgress () {
   if (!loaded) {
     load();
@@ -68,7 +64,6 @@ export function useProgress () {
   return {
     visited: readonly(visited),
     prep: readonly(prep),
-    toggleVisited,
-    togglePrep
+    toggleVisited
   };
 }
