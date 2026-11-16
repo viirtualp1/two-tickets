@@ -1,69 +1,38 @@
-import { readonly, ref } from 'vue';
-import type { Ref } from 'vue';
+import { computed } from 'vue';
+import { ORIGINAL_ID } from '../lib/plan';
+import { useWorkspace } from './useWorkspace';
+import type { TripPlan } from '../lib/plan';
+import type { SharedRecords } from './useWorkspace';
 
-const STORAGE_KEY = 'two-tickets:v1';
-const visited = ref<Record<string, boolean>>({});
-const prep = ref<Record<string, boolean>>({});
-let loaded = false;
+const { records, put } = useWorkspace();
+const legacy = readLegacy();
 
-function isFlagMap (value: unknown): value is Record<string, boolean> {
-  return typeof value === 'object' && value !== null && Object.values(value).every(flag => typeof flag === 'boolean');
-}
-
-function load () {
+function readLegacy (): { visited?: Record<string, boolean>; prep?: Record<string, boolean> } {
   try {
-    const saved: unknown = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? 'null');
-
-    if (typeof saved !== 'object' || saved === null) {
-      return;
-    }
-
-    if ('visited' in saved && isFlagMap(saved.visited)) {
-      visited.value = saved.visited;
-    }
-
-    if ('prep' in saved && isFlagMap(saved.prep)) {
-      prep.value = saved.prep;
-    }
+    return JSON.parse(localStorage.getItem('two-tickets:v1') ?? '{}') ?? {};
   } catch {
-    // Unreadable or blocked storage: start with nothing ticked.
+    return {};
   }
 }
 
-function persist () {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ visited: visited.value, prep: prep.value }));
-  } catch {
-    // Private browsing can block storage; ticks then last for this visit only.
+const migration: SharedRecords = {};
+for (const [id, visited] of Object.entries(legacy.visited ?? {})) {
+  const key = `visit:${ORIGINAL_ID}:${id}`;
+  if (visited === true && records.value[key] === undefined) migration[key] = true;
+}
+if (Object.keys(migration).length) put(migration);
+
+export function useProgress (plan: () => TripPlan | undefined) {
+  const visited = computed(() => {
+    const prefix = `visit:${plan()?.id}:`;
+    return Object.fromEntries(Object.entries(records.value).filter(([key, value]) => key.startsWith(prefix) && value === true)
+      .map(([key]) => [key.slice(prefix.length), true]));
+  });
+  function toggleVisited (id: string) {
+    const trip = plan();
+    if (trip) put({ [`visit:${trip.id}:${id}`]: !visited.value[id] });
   }
+  return { visited, toggleVisited };
 }
 
-function flip (map: Ref<Record<string, boolean>>, id: string) {
-  const next = { ...map.value };
-
-  if (next[id]) {
-    delete next[id];
-  } else {
-    next[id] = true;
-  }
-
-  map.value = next;
-  persist();
-}
-
-function toggleVisited (id: string) {
-  flip(visited, id);
-}
-
-export function useProgress () {
-  if (!loaded) {
-    load();
-    loaded = true;
-  }
-
-  return {
-    visited: readonly(visited),
-    prep: readonly(prep),
-    toggleVisited
-  };
-}
+export const legacyPrep = legacy.prep ?? {};

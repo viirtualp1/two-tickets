@@ -8,11 +8,13 @@ import PlaceSheet from '../components/PlaceSheet.vue';
 import RouteLegRow from '../components/RouteLegRow.vue';
 import RouteStopRow from '../components/RouteStopRow.vue';
 import TimeControl from '../components/TimeControl.vue';
-import { CITY_NAMES, TRIP_DAYS } from '../data/trip';
+import { useRoutePlan } from '../composables/usePlans';
+import { dayDate, dayPosition, hotelFor, hotelTarget, originalPlan, taxiLink } from '../lib/plan';
+import { toMinutes } from '../lib/hours';
 import { useProgress } from '../composables/useProgress';
 import { useTripClock } from '../composables/useTripClock';
 import { hasBackEntry } from '../lib/history';
-import { buildRoute, clampDayIndex, dayStartMinutes } from '../lib/route';
+import { buildRoute } from '../lib/route';
 import type { StopRow } from '../lib/route';
 import skylineShanghai from '../assets/art/skyline-shanghai.png';
 import skylineHongKong from '../assets/art/skyline-hongkong.png';
@@ -27,18 +29,20 @@ const SKYLINES = {
 
 const route = useRoute();
 const router = useRouter();
-const clock = useTripClock();
-const { visited, toggleVisited } = useProgress();
+const resolved = useRoutePlan();
+const plan = computed(() => resolved.value ?? originalPlan);
+const clock = useTripClock(() => plan.value);
+const { visited, toggleVisited } = useProgress(() => resolved.value);
 
 const manualMinutes = ref<number | null>(null);
 
-const dayIndex = computed(() => clampDayIndex(Number(route.params.number) - 1));
-const day = computed(() => TRIP_DAYS[dayIndex.value]!);
-const cityName = computed(() => CITY_NAMES[day.value.city]);
+const dayIndex = computed(() => dayPosition(plan.value, String(route.params.number)));
+const day = computed(() => plan.value.days[dayIndex.value]!);
+const cityName = computed(() => day.value.cityName);
 const isLive = computed(() => clock.value.dayIndex === dayIndex.value);
-const minutes = computed(() => manualMinutes.value ?? (isLive.value ? clock.value.minutes : dayStartMinutes(dayIndex.value)));
-const dayRoute = computed(() => buildRoute(dayIndex.value, minutes.value, visited.value));
-const homeTarget = computed(() => `hotel-${day.value.city}`);
+const minutes = computed(() => manualMinutes.value ?? (isLive.value ? clock.value.minutes : toMinutes(day.value.start)));
+const dayRoute = computed(() => buildRoute(plan.value, day.value, minutes.value, visited.value));
+const homeTarget = computed(() => hotelFor(plan.value, day.value) ? taxiLink(plan.value, hotelTarget(day.value)) : null);
 
 const summary = computed(() => {
   const { counts, withHours } = dayRoute.value;
@@ -69,7 +73,7 @@ const openRow = computed(() => {
 
 const sheetKicker = computed(() => {
   const at = openRow.value?.at;
-  const base = `day ${dayIndex.value + 1} · ${day.value.weekday} ${day.value.date} Dec`;
+  const base = `day ${dayIndex.value + 1} · ${dayDate(day.value.isoDate, { weekday: 'short', day: 'numeric', month: 'short' })}`;
 
   return at ? `${base} · ${at}` : base;
 });
@@ -91,13 +95,13 @@ function setMinutes (value: number) {
   manualMinutes.value = value;
 }
 
-watch(dayIndex, () => {
+watch(day, () => {
   manualMinutes.value = null;
 });
 </script>
 
 <template>
-  <main class="mx-auto max-w-md px-4 pb-44">
+  <main v-if="resolved && day.id === String(route.params.number)" class="mx-auto max-w-md px-4 pb-44">
     <header class="sticky top-0 z-20 -mx-4 flex items-center justify-between bg-paper/90 px-2 pb-2 pt-[max(8px,env(safe-area-inset-top))] backdrop-blur-md">
       <RouterLink
         to="/"
@@ -107,7 +111,8 @@ watch(dayIndex, () => {
         All days
       </RouterLink>
       <RouterLink
-        :to="`/taxi/${homeTarget}`"
+        v-if="homeTarget"
+        :to="homeTarget"
         class="flex h-11 items-center gap-2 rounded-full bg-card px-4 text-sm font-semibold"
       >
         <AppIcon
@@ -121,12 +126,13 @@ watch(dayIndex, () => {
 
     <section class="pt-2">
       <img
+        v-if="day.city !== 'other'"
         :src="SKYLINES[day.city]"
         alt=""
         class="-mb-3 ml-auto block w-52"
       >
       <p class="font-hand text-[26px] leading-none text-accent-ink">
-        day {{ dayIndex + 1 }} · {{ day.weekday }} {{ day.date }} Dec
+        day {{ dayIndex + 1 }} · {{ dayDate(day.isoDate, { weekday: 'short', day: 'numeric', month: 'short' }) }}
       </p>
       <h1 class="mt-2 text-[40px] font-extrabold leading-[1.02] tracking-tight">{{ day.title }}</h1>
       <p class="mt-2 text-[15px] leading-snug text-muted">{{ day.areas }}</p>
@@ -135,6 +141,7 @@ watch(dayIndex, () => {
     <DayStrip
       class="mt-6"
       :active-index="dayIndex"
+      :plan="plan"
     />
 
     <TimeControl
@@ -200,7 +207,10 @@ watch(dayIndex, () => {
     </div>
   </main>
 
+  <main v-else class="mx-auto max-w-md p-6"><RouterLink to="/">‹ All days</RouterLink><p class="mt-4">This day is unavailable on this device.</p></main>
+
   <NextUpBar
+    v-if="resolved && day.id === String(route.params.number)"
     :next="dayRoute.next"
     :home-target="homeTarget"
     @tick="toggleVisited"
@@ -209,7 +219,9 @@ watch(dayIndex, () => {
 
   <Transition name="sheet">
     <PlaceSheet
-      v-if="openRow"
+      v-if="resolved && openRow"
+      :plan="plan"
+      :day="day"
       :row="openRow"
       :kicker="sheetKicker"
       @close="closeStop"

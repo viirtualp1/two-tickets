@@ -15,13 +15,13 @@ export function directionsUrl (place: Place) {
     return `https://uri.amap.com/search?${query}`;
   }
 
-  const query = new URLSearchParams({ api: '1', query: `${keyword} Hong Kong` });
+  const query = new URLSearchParams({ api: '1', query: `${keyword} ${place.cityName}` });
 
   return `https://www.google.com/maps/search/?${query}`;
 }
 
 export function appleMapsUrl (place: Place) {
-  const query = new URLSearchParams({ q: place.zh || place.name, sll: CITY_CENTRES[place.city] });
+  const query = new URLSearchParams({ q: place.zh || place.name, ...(place.city === 'other' ? {} : { sll: CITY_CENTRES[place.city] }) });
 
   return `https://maps.apple.com/?${query}`;
 }

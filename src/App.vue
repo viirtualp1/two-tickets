@@ -2,30 +2,37 @@
 import { computed, watch } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
 import ChecklistReminder from './components/ChecklistReminder.vue';
-import { TRIP_DAYS } from './data/trip';
+import { usePlans, useRoutePlan } from './composables/usePlans';
+import { startTripSync } from './composables/useTripSync';
+import { dayPosition } from './lib/plan';
 import { useTripClock } from './composables/useTripClock';
-import { clampDayIndex, findPlace } from './lib/route';
-import type { City } from './data/trip';
+import { findPlace } from './lib/route';
+import type { Destination } from './lib/plan';
 
 const route = useRoute();
-const clock = useTripClock();
+const { activePlan } = usePlans();
+const routePlan = useRoutePlan();
+const clock = useTripClock(() => activePlan.value);
+startTripSync();
 
-const city = computed<City>(() => {
+const city = computed<Destination>(() => {
   if (route.name === 'day') {
-    return TRIP_DAYS[clampDayIndex(Number(route.params.number) - 1)]?.city ?? 'sh';
+    const plan = routePlan.value;
+    return plan?.days[dayPosition(plan, String(route.params.number))]?.city ?? 'sh';
   }
 
   if (route.name === 'taxi') {
     const target = String(route.params.target);
 
+    if (target.startsWith('hotel-day-')) return routePlan.value?.days.find(day => day.id === target.slice(10))?.city ?? 'sh';
     if (target.startsWith('hotel-')) {
       return target === 'hotel-hk' ? 'hk' : 'sh';
     }
 
-    return findPlace(target)?.city ?? 'sh';
+    return (routePlan.value && findPlace(target, routePlan.value)?.city) || 'sh';
   }
 
-  return clock.value.dayIndex >= 6 && clock.value.dayIndex <= 7 ? 'hk' : 'sh';
+  return activePlan.value.days[clock.value.dayIndex]?.city ?? activePlan.value.days[0]!.city;
 });
 
 watch(city, value => {

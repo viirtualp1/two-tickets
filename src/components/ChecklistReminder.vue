@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { usePlans } from '../composables/usePlans';
 import { useRouter } from 'vue-router';
 import AppIcon from './AppIcon.vue';
 import { useChecklistReminders } from '../composables/useChecklistReminders';
 
 const router = useRouter();
-const { due, dismiss } = useChecklistReminders();
+const { activePlan } = usePlans();
+const { due, dismiss } = useChecklistReminders(() => activePlan.value.id);
 const reminder = computed(() => due.value[0]);
 
 function dismissCurrent () {

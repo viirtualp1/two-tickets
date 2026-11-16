@@ -2,7 +2,9 @@
 import { computed, onBeforeUnmount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import AppIcon from '../components/AppIcon.vue';
-import { HOTELS, TAXI_PHRASES } from '../data/trip';
+import { TAXI_PHRASES } from '../data/trip';
+import { useRoutePlan } from '../composables/usePlans';
+import type { Destination } from '../lib/plan';
 import { hasBackEntry } from '../lib/history';
 import { directionsLabel, directionsUrl } from '../lib/maps';
 import { findPlace } from '../lib/route';
@@ -18,6 +20,7 @@ const COPIED_MS = 1800;
 let copiedTimer: ReturnType<typeof setTimeout> | null = null;
 
 const route = useRoute();
+const plan = useRoutePlan();
 const router = useRouter();
 
 const copied = ref(false);
@@ -25,19 +28,22 @@ const copied = ref(false);
 const card = computed<TaxiCard | null>(() => {
   const target = String(route.params.target);
 
-  if (target === 'hotel-sh' || target === 'hotel-hk') {
-    const city = target === 'hotel-hk' ? 'hk' : 'sh';
-    const hotel = HOTELS[city];
+  if (!plan.value) return null;
+  if (target.startsWith('hotel-')) {
+    const day = target.startsWith('hotel-day-') ? plan.value.days.find(day => day.id === target.slice(10)) : undefined;
+    const city = day?.city ?? target.slice(6) as Destination;
+    const hotel = day?.hotel ?? plan.value.hotels[city];
+    if (!hotel) return null;
 
-    return { kicker: 'tonight we sleep at', place: { name: hotel.name, zh: hotel.zh, city }, detail: hotel.near };
+    return { kicker: 'tonight we sleep at', place: { name: hotel.name, zh: hotel.zh, city, cityName: day?.cityName ?? plan.value.days.find(day => day.city === city)?.cityName ?? '' }, detail: hotel.near };
   }
 
-  const place = findPlace(target);
+  const place = findPlace(target, plan.value);
 
   return place ? { kicker: 'please take us here', place, detail: '' } : null;
 });
 
-const phrase = computed(() => TAXI_PHRASES[card.value?.place.city ?? 'sh']);
+const phrase = computed(() => card.value?.place.city === 'other' ? null : TAXI_PHRASES[card.value?.place.city ?? 'sh']);
 const lang = computed(() => (card.value?.place.city === 'hk' ? 'zh-Hant' : 'zh-Hans'));
 
 function goBack () {
@@ -95,7 +101,7 @@ onBeforeUnmount(() => {
       <div class="flex flex-1 flex-col justify-center gap-5">
         <p
           v-if="card.place.zh"
-          :lang="lang"
+          :lang="card.place.city === 'other' ? undefined : lang"
           class="text-[54px] font-extrabold leading-[1.15] tracking-wide"
         >
           {{ card.place.zh }}
@@ -104,7 +110,7 @@ onBeforeUnmount(() => {
           v-else
           class="rounded-3xl border-2 border-dashed border-muted/50 px-5 py-6 text-lg leading-snug text-muted"
         >
-          [Our hotel’s name &amp; address in Chinese — copy it from the booking into <code class="text-sm">src/data/trip.ts</code>]
+          No local-language name in the plan.
         </p>
         <p class="text-xl font-bold leading-snug">{{ card.place.name }}</p>
         <p
@@ -115,7 +121,7 @@ onBeforeUnmount(() => {
         </p>
       </div>
 
-      <div class="border-t-2 border-dashed border-line pt-5">
+      <div v-if="phrase" class="border-t-2 border-dashed border-line pt-5">
         <p
           :lang="lang"
           class="text-[30px] font-extrabold leading-tight"

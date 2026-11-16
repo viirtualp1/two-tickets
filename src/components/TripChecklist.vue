@@ -6,9 +6,9 @@ import { useNotificationPermission } from '../composables/useChecklistReminders'
 import { downloadCalendarReminder, reminderLabel, toLocalDateTime } from '../lib/calendarReminder';
 import type { ChecklistItem } from '../composables/useChecklist';
 
-defineProps<{ heading: string }>();
+const props = defineProps<{ heading: string; tripId: string }>();
 
-const { items, storageWarning, save, remove, toggle } = useChecklist();
+const { items, storageWarning, save, remove, toggle } = useChecklist(() => props.tripId);
 const { browserNotifications, permission, enableNotifications } = useNotificationPermission();
 const editor = useTemplateRef<HTMLDialogElement>('editor');
 const addButton = useTemplateRef<HTMLButtonElement>('addButton');
@@ -71,7 +71,7 @@ function submit () {
   }
 
   if (!save(editingId.value, { title: title.value.trim(), why: why.value.trim(), reminderAt })) {
-    error.value = 'This to-do was removed in another tab. Close the editor and add it again.';
+    error.value = 'This to-do was removed elsewhere. Close the editor and add it again.';
     return;
   }
 

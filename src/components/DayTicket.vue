@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
-import type { TripDay } from '../data/trip';
+import { dayDate, dayLink } from '../lib/plan';
+import type { PlanDay, TripPlan } from '../lib/plan';
 import type { DayProgress } from '../lib/route';
 
 const props = defineProps<{
-  number: number;
-  day: TripDay;
+  plan: TripPlan;
+  day: PlanDay;
   progress: DayProgress;
   isToday: boolean;
 }>();
@@ -26,7 +27,7 @@ const progressWidth = computed(() => `${props.progress.total ? (props.progress.d
 
 <template>
   <RouterLink
-    :to="`/day/${props.number}`"
+    :to="dayLink(props.plan, props.day)"
     class="lift block rounded-3xl"
   >
     <span
@@ -36,7 +37,7 @@ const progressWidth = computed(() => `${props.progress.total ? (props.progress.d
       <span class="flex flex-col items-center justify-center py-3">
         <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">{{ props.day.weekday }}</span>
         <span class="text-[34px] font-extrabold leading-none tabular-nums">{{ props.day.date }}</span>
-        <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Dec</span>
+        <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">{{ dayDate(props.day.isoDate, { month: 'short' }) }}</span>
       </span>
       <span
         class="absolute inset-y-3 left-[87px] border-l-2 border-dashed border-line"
