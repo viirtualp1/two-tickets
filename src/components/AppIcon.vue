@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-export type IconName = 'metro' | 'walk' | 'flight' | 'transfer' | 'home' | 'back' | 'forward' | 'close' | 'check' | 'pin' | 'copy' | 'talk' | 'heart' | 'clock' | 'plus' | 'edit';
+export type IconName = 'metro' | 'walk' | 'flight' | 'transfer' | 'home' | 'back' | 'forward' | 'close' | 'check' | 'pin' | 'copy' | 'talk' | 'heart' | 'clock' | 'plus' | 'edit' | 'calendar' | 'settings' | 'sync';
 
 const props = withDefaults(defineProps<{
   name: IconName;
@@ -30,7 +30,10 @@ const PATHS: Record<IconName, string> = {
   heart: '<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
   clock: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
-  edit: '<path d="m13.5 6.5 4 4M4 20l4.5-1 11-11a2.8 2.8 0 0 0-4-4l-11 11L4 20z"/>'
+  edit: '<path d="m13.5 6.5 4 4M4 20l4.5-1 11-11a2.8 2.8 0 0 0-4-4l-11 11L4 20z"/>',
+  calendar: '<rect x="4" y="5.5" width="16" height="15" rx="3"/><path d="M8 3.5v4m8-4v4M4 10h16m-12 4h.01m4 0h.01m4 0h.01m-8 3h.01m4 0h.01"/>',
+  settings: '<path d="M5 7h3m4 0h7M5 12h9m4 0h1M5 17h5m4 0h5"/><circle cx="10" cy="7" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="12" cy="17" r="2"/>',
+  sync: '<path d="M19.5 8a8 8 0 0 0-13.4-2L4 8m0-4v4h4m-3.5 8a8 8 0 0 0 13.4 2l2.1-2m0 4v-4h-4"/>'
 };
 
 const markup = computed(() => PATHS[props.name]);

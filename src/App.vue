@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
+import BottomNavigation from './components/BottomNavigation.vue';
 import ChecklistReminder from './components/ChecklistReminder.vue';
 import { usePlans, useRoutePlan } from './composables/usePlans';
 import { startTripSync } from './composables/useTripSync';
@@ -13,6 +14,7 @@ const route = useRoute();
 const { activePlan } = usePlans();
 const routePlan = useRoutePlan();
 const clock = useTripClock(() => activePlan.value);
+const showNavigation = computed(() => ['home', 'days', 'day'].includes(String(route.name)));
 startTripSync();
 
 const city = computed<Destination>(() => {
@@ -43,5 +45,6 @@ watch(city, value => {
 
 <template>
   <RouterView />
+  <BottomNavigation v-if="showNavigation" />
   <ChecklistReminder />
 </template>

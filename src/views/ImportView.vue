@@ -93,7 +93,7 @@ const action = 'min-h-11 rounded-full bg-tint px-4 text-sm font-bold text-accent
 
 <template>
   <main class="mx-auto flex max-w-md flex-col gap-4 px-4 pb-16 pt-[max(16px,env(safe-area-inset-top))]">
-    <RouterLink to="/" class="inline-flex min-h-11 items-center gap-1 self-start rounded-full px-2 font-bold"><AppIcon name="back" /> All days</RouterLink>
+    <RouterLink to="/" class="inline-flex min-h-11 items-center gap-1 self-start rounded-full px-2 font-bold"><AppIcon name="back" /> Home</RouterLink>
     <h1 class="px-1 text-[34px] font-extrabold tracking-tight">{{ editing ? 'Edit trip' : draft ? 'Review trip' : 'Import trip' }}</h1>
     <template v-if="!draft">
       <form class="grid gap-2 rounded-3xl bg-card p-5" @submit.prevent="reviewNotes">
