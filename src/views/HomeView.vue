@@ -95,6 +95,30 @@ const dateRange = computed(() => {
       </section>
     </div>
 
-    <TripChecklist :key="plan.id" :trip-id="plan.id" :heading="clock.phase === 'before' ? 'Before we go' : 'Trip checklist'" />
+    <TripChecklist class="home-checklist" :key="plan.id" :trip-id="plan.id" :heading="clock.phase === 'before' ? 'Before we go' : 'Trip checklist'" />
   </main>
 </template>
+
+<style scoped>
+.home-layout {
+  box-sizing: border-box;
+  height: 100dvh;
+  min-height: 0;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  overflow: clip;
+}
+
+.home-checklist :deep(ul) {
+  flex: 1 1 0;
+}
+
+@media (max-height: 420px) {
+  .countdown-ticket {
+    --cut: 72px;
+  }
+
+  .countdown-number {
+    font-size: 46px;
+  }
+}
+</style>
