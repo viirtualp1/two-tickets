@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
+import type { RouteLocationRaw } from 'vue-router';
 import AppIcon from './AppIcon.vue';
 import { directionsUrl } from '../lib/maps';
 import type { StopRow } from '../lib/route';
 
 const props = defineProps<{
   next: StopRow | null;
-  homeTarget: string;
+  homeTarget: RouteLocationRaw | null;
 }>();
 
 const emit = defineEmits<{
@@ -62,7 +63,8 @@ const goUrl = computed(() => (props.next ? directionsUrl(props.next.place) : '')
       <template v-else>
         <p class="flex-1 px-3 font-hand text-2xl leading-tight text-accent-ink">that was the whole day</p>
         <RouterLink
-          :to="`/taxi/${props.homeTarget}`"
+          v-if="props.homeTarget"
+          :to="props.homeTarget"
           class="inline-flex h-12 shrink-0 items-center gap-2 rounded-full bg-accent px-5 font-bold text-white"
         >
           <AppIcon

@@ -1,56 +1,42 @@
-import { readonly, ref } from 'vue';
+import { computed, ref } from 'vue';
+import type { TripPlan } from '../lib/plan';
 
-export interface TripClock {
-  dayIndex: number;
-  minutes: number;
-  isPreview: boolean;
-}
+const DAY_MS = 86_400_000;
+const preview = new URLSearchParams(location.search).get('preview');
+const candidate = preview?.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})$/);
+const previewMatch = candidate && Number.isFinite(Date.parse(`${candidate[1]}T${candidate[2]}:${candidate[3]}Z`)) ? candidate : null;
+const now = ref(Date.now());
+let ticking = false;
 
-const TRIP_START_UTC = Date.UTC(2026, 11, 6);
-const SHANGHAI_OFFSET_MS = 8 * 60 * 60 * 1000;
-const DAY_MS = 24 * 60 * 60 * 1000;
-const NIGHT_OWL_CUTOFF_MINUTES = 5 * 60;
-const TICK_MS = 30_000;
-const previewAt = readPreview();
-const clock = ref(readClock());
-let ticker: ReturnType<typeof setInterval> | null = null;
-
-// `?preview=2026-12-08T11:20` (Shanghai time) shows the app as it will look on that moment of the trip.
-function readPreview () {
-  const value = new URLSearchParams(window.location.search).get('preview');
-
-  if (!value) {
-    return null;
+export function useTripClock (trip: () => TripPlan) {
+  if (!ticking && !previewMatch) {
+    ticking = true;
+    window.setInterval(() => { now.value = Date.now(); }, 30_000);
+    document.addEventListener('visibilitychange', () => { now.value = Date.now(); });
   }
 
-  const ms = Date.parse(`${value}+08:00`);
-
-  return Number.isNaN(ms) ? null : ms;
-}
-
-function readClock (): TripClock {
-  const local = new Date((previewAt ?? Date.now()) + SHANGHAI_OFFSET_MS);
-  const midnight = Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate());
-  let dayIndex = Math.floor((midnight - TRIP_START_UTC) / DAY_MS);
-  let minutes = local.getUTCHours() * 60 + local.getUTCMinutes();
-
-  // At 1 am we are still out on yesterday's plan, not starting tomorrow's.
-  if (minutes < NIGHT_OWL_CUTOFF_MINUTES) {
-    dayIndex -= 1;
-    minutes += 24 * 60;
-  }
-
-  return { dayIndex, minutes, isPreview: previewAt !== null };
-}
-
-function tick () {
-  clock.value = readClock();
-}
-
-export function useTripClock () {
-  if (!ticker && previewAt === null) {
-    ticker = setInterval(tick, TICK_MS);
-  }
-
-  return readonly(clock);
+  return computed(() => {
+    const plan = trip();
+    const date = new Date(now.value);
+    const fields = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+      timeZone: plan.timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+    }).formatToParts(date).map(({ type, value }) => [type, value]));
+    const iso = previewMatch?.[1] ?? `${fields.year}-${fields.month}-${fields.day}`;
+    let midnight = Date.parse(iso + 'T00:00Z');
+    let minutes = Number(previewMatch?.[2] ?? fields.hour) * 60 + Number(previewMatch?.[3] ?? fields.minute);
+    if (minutes < 300) {
+      midnight -= DAY_MS;
+      minutes += 1440;
+    }
+    const today = new Date(midnight).toISOString().slice(0, 10);
+    const start = plan.days[0]!.isoDate;
+    const end = plan.days.at(-1)!.isoDate;
+    const phase = today < start ? 'before' : today > end ? 'after' : 'during';
+    return {
+      dayIndex: plan.days.findIndex(day => day.isoDate === today),
+      daysToGo: (Date.parse(start + 'T00:00Z') - midnight) / DAY_MS,
+      minutes, phase, isPreview: Boolean(previewMatch)
+    };
+  });
 }

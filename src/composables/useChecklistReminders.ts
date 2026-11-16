@@ -22,8 +22,8 @@ export function useNotificationPermission () {
   return { browserNotifications, permission: readonly(permission), enableNotifications };
 }
 
-export function useChecklistReminders () {
-  const { items, markReminder } = useChecklist();
+export function useChecklistReminders (tripId: () => string) {
+  const { items, markReminder } = useChecklist(tripId);
   const now = ref(Date.now());
   const pending = computed(() => items.value.filter(item => !item.done && !item.dismissed && item.reminderAt !== null));
   const due = computed(() => pending.value.filter(item => Date.parse(item.reminderAt!) <= now.value));

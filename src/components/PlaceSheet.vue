@@ -4,10 +4,14 @@ import { RouterLink } from 'vue-router';
 import AppIcon from './AppIcon.vue';
 import { appleMapsUrl, directionsLabel, directionsUrl } from '../lib/maps';
 import type { OpenTone } from '../lib/hours';
+import { hotelFor, hotelTarget, taxiLink } from '../lib/plan';
+import type { PlanDay, TripPlan } from '../lib/plan';
 import type { StopRow } from '../lib/route';
 
 const props = defineProps<{
   row: StopRow;
+  plan: TripPlan;
+  day: PlanDay;
   kicker: string;
 }>();
 
@@ -30,8 +34,8 @@ const closeButton = useTemplateRef<HTMLButtonElement>('closeButton');
 
 const lang = computed(() => (props.row.place.city === 'hk' ? 'zh-Hant' : 'zh-Hans'));
 const showZh = computed(() => Boolean(props.row.zh) && props.row.zh !== props.row.name);
-const taxiTarget = computed(() => (props.row.isHotel ? `hotel-${props.row.place.city}` : props.row.id));
-const canShowDriver = computed(() => props.row.isHotel || Boolean(props.row.zh));
+const taxiTarget = computed(() => (props.row.isHotel ? hotelTarget(props.day) : props.row.id));
+const canShowDriver = computed(() => Boolean(props.row.zh) || (props.row.isHotel && Boolean(hotelFor(props.plan, props.day))));
 
 async function copyChinese () {
   try {
@@ -186,7 +190,7 @@ onBeforeUnmount(() => {
 
       <RouterLink
         v-if="canShowDriver"
-        :to="`/taxi/${taxiTarget}`"
+        :to="taxiLink(props.plan, taxiTarget)"
         class="inline-flex h-13 items-center justify-center gap-2 rounded-full bg-card font-bold"
       >
         <AppIcon
