@@ -79,7 +79,7 @@ const sheetKicker = computed(() => {
 });
 
 function openStop (id: string) {
-  router.push({ query: { stop: id } });
+  router.push({ query: { ...route.query, stop: id } });
 }
 
 function closeStop () {
@@ -88,7 +88,9 @@ function closeStop () {
     return;
   }
 
-  router.replace({ query: {} });
+  const query = { ...route.query };
+  delete query.stop;
+  router.replace({ query });
 }
 
 function setMinutes (value: number) {
@@ -101,10 +103,10 @@ watch(day, () => {
 </script>
 
 <template>
-  <main v-if="resolved && day.id === String(route.params.number)" class="mx-auto max-w-md px-4 pb-44">
+  <main v-if="resolved && day.id === String(route.params.number)" class="mx-auto max-w-md px-4 pb-[calc(var(--tab-clearance)+88px)]">
     <header class="sticky top-0 z-20 -mx-4 flex items-center justify-between bg-paper/90 px-2 pb-2 pt-[max(8px,env(safe-area-inset-top))] backdrop-blur-md">
       <RouterLink
-        to="/"
+        :to="{ name: 'days' }"
         class="flex h-11 items-center gap-1 rounded-full pl-1 pr-3 font-semibold"
       >
         <AppIcon name="back" />
@@ -207,7 +209,7 @@ watch(day, () => {
     </div>
   </main>
 
-  <main v-else class="mx-auto max-w-md p-6"><RouterLink to="/">‹ All days</RouterLink><p class="mt-4">This day is unavailable on this device.</p></main>
+  <main v-else class="mx-auto max-w-md p-6"><RouterLink :to="{ name: 'days' }">‹ All days</RouterLink><p class="mt-4">This day is unavailable on this device.</p></main>
 
   <NextUpBar
     v-if="resolved && day.id === String(route.params.number)"

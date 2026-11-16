@@ -64,7 +64,7 @@ function copy () {
 
 <template>
   <main class="mx-auto flex max-w-md flex-col gap-5 px-4 pb-16 pt-[max(16px,env(safe-area-inset-top))]">
-    <RouterLink to="/" class="inline-flex min-h-11 items-center gap-1 self-start rounded-full px-2 font-bold"><AppIcon name="back" /> All days</RouterLink>
+    <RouterLink to="/" class="inline-flex min-h-11 items-center gap-1 self-start rounded-full px-2 font-bold"><AppIcon name="back" /> Home</RouterLink>
     <h1 class="px-1 text-[34px] font-extrabold tracking-tight">Sync devices</h1>
     <section class="grid gap-3 rounded-3xl bg-card p-5">
       <p class="font-bold" role="status">{{ status }}</p>

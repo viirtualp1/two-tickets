@@ -20,7 +20,7 @@ const goUrl = computed(() => (props.next ? directionsUrl(props.next.place) : '')
 </script>
 
 <template>
-  <div class="pointer-events-none fixed inset-x-0 bottom-0 z-30 px-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+  <div class="pointer-events-none fixed inset-x-0 bottom-[calc(var(--tab-clearance)-8px)] z-30 px-3">
     <div class="pointer-events-auto mx-auto flex max-w-md items-center gap-2 rounded-[30px] bg-card p-2.5 shadow-[0_14px_34px_rgb(60_30_30/0.18)]">
       <template v-if="props.next">
         <button

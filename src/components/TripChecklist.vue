@@ -108,13 +108,13 @@ function downloadReminder () {
 </script>
 
 <template>
-  <section aria-labelledby="prep-title">
-    <div class="flex items-center justify-between gap-3 px-1">
+  <section class="flex min-h-0 flex-col" aria-labelledby="prep-title">
+    <div class="flex shrink-0 items-center justify-between gap-3 px-1">
       <div>
         <h2
           id="prep-title"
           tabindex="-1"
-          class="scroll-mt-[max(16px,env(safe-area-inset-top))] text-2xl font-extrabold tracking-tight"
+          class="scroll-mt-[max(16px,env(safe-area-inset-top))] text-[clamp(20px,6vw,24px)] font-extrabold tracking-tight"
         >
           {{ heading }}
         </h2>
@@ -145,7 +145,7 @@ function downloadReminder () {
 
     <ul
       v-if="items.length"
-      class="mt-3 divide-y divide-line rounded-3xl bg-card px-2"
+      class="mt-2 min-h-0 divide-y divide-line overflow-y-auto overscroll-contain rounded-3xl bg-card px-2"
     >
       <li
         v-for="item in items"
@@ -154,7 +154,7 @@ function downloadReminder () {
       >
         <button
           type="button"
-          class="flex min-w-0 flex-1 items-start gap-3 rounded-xl px-2 py-3.5 text-left"
+          class="flex min-w-0 flex-1 items-start gap-3 rounded-xl px-2 py-2.5 text-left"
           :aria-pressed="item.done"
           :aria-label="item.title"
           @click="toggle(item.id)"
