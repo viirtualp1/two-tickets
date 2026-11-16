@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Bricolage Grotesque", "PingFang SC", "PingFang TC", "Hiragino Sans GB", "Noto Sans SC", system-ui, sans-serif;
-  --font-hand: "Caveat", "Bricolage Grotesque", cursive;
+  --font-sans: "Bricolage Grotesque Variable", "PingFang SC", "PingFang TC", "Hiragino Sans GB", "Noto Sans SC", system-ui, sans-serif;
+  --font-hand: "Caveat Variable", "Bricolage Grotesque Variable", cursive;
   --color-ink: #1e1a2b;
   --color-muted: #5d5869;
   --color-open: #2c6a3a;

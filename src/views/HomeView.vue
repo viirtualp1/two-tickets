@@ -55,43 +55,42 @@ const skyline = computed(() => (today.value?.city === 'hk' ? skylineHongKong : s
         style="--cut: 252px"
         aria-labelledby="hero-title"
       >
-        <img
-          :src="skyline"
-          alt=""
-          class="pointer-events-none absolute right-0 top-[132px] w-[78%] opacity-80"
-        >
-
         <div class="relative flex h-[252px] flex-col px-6 pt-6">
+          <img
+            :src="skyline"
+            alt=""
+            class="pointer-events-none absolute inset-x-0 bottom-1 w-full opacity-80"
+          >
           <template v-if="phase === 'before'">
-            <p class="font-hand text-2xl leading-none text-accent-ink">our anniversary trip</p>
+            <p class="relative font-hand text-2xl leading-none text-accent-ink">our anniversary trip</p>
             <h1
               id="hero-title"
-              class="mt-2 flex items-baseline gap-3"
+              class="relative mt-2"
             >
-              <span class="text-[88px] font-extrabold leading-[0.85] tracking-tighter text-accent-ink tabular-nums">{{ daysToGo }}</span>
-              <span class="text-xl font-bold leading-tight">{{ daysToGo === 1 ? 'sleep' : 'sleeps' }} till<br>Shanghai</span>
+              <span class="align-baseline text-[88px] font-extrabold leading-[0.85] tracking-tighter text-accent-ink tabular-nums">{{ daysToGo }}</span>
+              <span class="ml-3 inline-block align-baseline text-xl font-bold leading-tight">{{ daysToGo === 1 ? 'sleep' : 'sleeps' }} till<br>Shanghai</span>
             </h1>
           </template>
           <template v-else-if="phase === 'during' && today">
-            <p class="font-hand text-2xl leading-none text-accent-ink">day {{ clock.dayIndex + 1 }} of {{ TRIP_DAYS.length }}</p>
+            <p class="relative font-hand text-2xl leading-none text-accent-ink">day {{ clock.dayIndex + 1 }} of {{ TRIP_DAYS.length }}</p>
             <h1
               id="hero-title"
-              class="mt-2 text-[34px] font-extrabold leading-[1.02] tracking-tight"
+              class="relative mt-2 text-[34px] font-extrabold leading-[1.02] tracking-tight"
             >
               {{ today.title }}
             </h1>
             <p
               v-if="todayNext"
-              class="mt-2 text-[15px] text-muted"
+              class="relative mt-2 text-[15px] text-muted"
             >
               Next: <span class="font-semibold text-ink">{{ todayNext.name }}</span>
             </p>
           </template>
           <template v-else>
-            <p class="font-hand text-2xl leading-none text-accent-ink">we did it</p>
+            <p class="relative font-hand text-2xl leading-none text-accent-ink">we did it</p>
             <h1
               id="hero-title"
-              class="mt-2 text-[34px] font-extrabold leading-[1.02] tracking-tight"
+              class="relative mt-2 text-[34px] font-extrabold leading-[1.02] tracking-tight"
             >
               8 days, {{ placesTogether }} places, one us.
             </h1>
@@ -106,7 +105,7 @@ const skyline = computed(() => (today.value?.city === 'hk' ? skylineHongKong : s
         <div class="relative px-6 pb-6 pt-5">
           <dl
             v-if="phase !== 'during'"
-            class="grid grid-cols-3 gap-3"
+            class="grid grid-cols-2 gap-3"
           >
             <div>
               <dt class="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Route</dt>
@@ -115,10 +114,6 @@ const skyline = computed(() => (today.value?.city === 'hk' ? skylineHongKong : s
             <div>
               <dt class="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Lands</dt>
               <dd class="mt-0.5 font-bold">Sun 18:45</dd>
-            </div>
-            <div>
-              <dt class="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Seats</dt>
-              <dd class="mt-0.5 font-bold">2, together</dd>
             </div>
           </dl>
           <RouterLink
