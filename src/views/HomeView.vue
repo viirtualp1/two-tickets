@@ -3,7 +3,8 @@ import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
 import AppIcon from '../components/AppIcon.vue';
 import DayTicket from '../components/DayTicket.vue';
-import { CITY_NAMES, HOTELS, PREP, TRIP_DAYS } from '../data/trip';
+import TripChecklist from '../components/TripChecklist.vue';
+import { CITY_NAMES, HOTELS, TRIP_DAYS } from '../data/trip';
 import { useProgress } from '../composables/useProgress';
 import { useTripClock } from '../composables/useTripClock';
 import { buildRoute, dayProgress } from '../lib/route';
@@ -16,7 +17,7 @@ const HOTEL_CITIES: City[] = ['sh', 'hk'];
 const FLIGHT_DAY_INDEX = 6;
 
 const clock = useTripClock();
-const { visited, prep, togglePrep } = useProgress();
+const { visited } = useProgress();
 
 const phase = computed(() => {
   if (clock.value.dayIndex < 0) {
@@ -31,7 +32,6 @@ const today = computed(() => (phase.value === 'during' ? TRIP_DAYS[clock.value.d
 const todayNext = computed(() => (today.value ? buildRoute(clock.value.dayIndex, clock.value.minutes, visited.value).next : null));
 const progress = computed(() => TRIP_DAYS.map((_, index) => dayProgress(index, visited.value)));
 const placesTogether = computed(() => progress.value.reduce((sum, day) => sum + day.done, 0));
-const prepDone = computed(() => PREP.filter(item => prep.value[item.id]).length);
 const skyline = computed(() => (today.value?.city === 'hk' ? skylineHongKong : skylineShanghai));
 </script>
 
@@ -62,10 +62,9 @@ const skyline = computed(() => (today.value?.city === 'hk' ? skylineHongKong : s
             class="pointer-events-none absolute inset-x-0 bottom-1 w-full opacity-80"
           >
           <template v-if="phase === 'before'">
-            <p class="relative font-hand text-2xl leading-none text-accent-ink">our anniversary trip</p>
             <h1
               id="hero-title"
-              class="relative mt-2"
+              class="relative mt-3"
             >
               <span class="align-baseline text-[88px] font-extrabold leading-[0.85] tracking-tighter text-accent-ink tabular-nums">{{ daysToGo }}</span>
               <span class="ml-3 inline-block align-baseline text-xl font-bold leading-tight">{{ daysToGo === 1 ? 'sleep' : 'sleeps' }} till<br>Shanghai</span>
@@ -131,51 +130,7 @@ const skyline = computed(() => (today.value?.city === 'hk' ? skylineHongKong : s
       </section>
     </div>
 
-    <section
-      v-if="phase === 'before'"
-      aria-labelledby="prep-title"
-    >
-      <div class="flex items-baseline justify-between px-1">
-        <h2
-          id="prep-title"
-          class="text-2xl font-extrabold tracking-tight"
-        >
-          Before we go
-        </h2>
-        <p class="text-sm text-muted">{{ prepDone }} of {{ PREP.length }} sorted</p>
-      </div>
-      <ul class="mt-3 divide-y divide-line rounded-3xl bg-card px-2">
-        <li
-          v-for="item in PREP"
-          :key="item.id"
-        >
-          <button
-            type="button"
-            class="flex w-full items-start gap-3 px-2 py-3.5 text-left"
-            :aria-pressed="Boolean(prep[item.id])"
-            @click="togglePrep(item.id)"
-          >
-            <span
-              class="mt-0.5 grid size-6 shrink-0 place-items-center rounded-lg border-2 transition"
-              :class="prep[item.id] ? 'border-accent bg-accent text-white' : 'border-muted/60 text-transparent'"
-            >
-              <AppIcon
-                name="check"
-                :size="14"
-                :stroke="3"
-              />
-            </span>
-            <span class="flex flex-col gap-0.5">
-              <span
-                class="font-bold leading-snug"
-                :class="prep[item.id] ? 'text-muted line-through decoration-muted/50' : ''"
-              >{{ item.title }}</span>
-              <span class="text-[13px] leading-snug text-muted">{{ item.why }}</span>
-            </span>
-          </button>
-        </li>
-      </ul>
-    </section>
+    <TripChecklist :heading="phase === 'before' ? 'Before we go' : 'Trip checklist'" />
 
     <section aria-labelledby="days-title">
       <h2
