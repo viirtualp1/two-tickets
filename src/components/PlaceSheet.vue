@@ -1,87 +1,10 @@
-<script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
-import { RouterLink } from 'vue-router';
-import AppIcon from './AppIcon.vue';
-import { appleMapsUrl, directionsLabel, directionsUrl } from '../lib/maps';
-import type { OpenTone } from '../lib/hours';
-import { hotelFor, hotelTarget, taxiLink } from '../lib/plan';
-import type { PlanDay, TripPlan } from '../lib/plan';
-import type { StopRow } from '../lib/route';
-
-const props = defineProps<{
-  row: StopRow;
-  plan: TripPlan;
-  day: PlanDay;
-  kicker: string;
-}>();
-
-const emit = defineEmits<{
-  close: [];
-  toggle: [];
-}>();
-
-const TONES: Record<OpenTone, string> = {
-  open: 'text-open',
-  soon: 'text-soon',
-  later: 'text-ink',
-  closed: 'text-ink'
-};
-const COPIED_MS = 1800;
-let copiedTimer: ReturnType<typeof setTimeout> | null = null;
-
-const copied = ref(false);
-const closeButton = useTemplateRef<HTMLButtonElement>('closeButton');
-
-const lang = computed(() => (props.row.place.city === 'hk' ? 'zh-Hant' : 'zh-Hans'));
-const showZh = computed(() => Boolean(props.row.zh) && props.row.zh !== props.row.name);
-const taxiTarget = computed(() => (props.row.isHotel ? hotelTarget(props.day) : props.row.id));
-const canShowDriver = computed(() => Boolean(props.row.zh) || (props.row.isHotel && Boolean(hotelFor(props.plan, props.day))));
-
-async function copyChinese () {
-  try {
-    await navigator.clipboard.writeText(props.row.zh);
-    copied.value = true;
-
-    if (copiedTimer) {
-      clearTimeout(copiedTimer);
-    }
-
-    copiedTimer = setTimeout(() => {
-      copied.value = false;
-    }, COPIED_MS);
-  } catch {
-    // Clipboard can be refused outside a secure context; the name stays on screen to copy by hand.
-    copied.value = false;
-  }
-}
-
-function onKeydown (event: KeyboardEvent) {
-  if (event.key === 'Escape') {
-    emit('close');
-  }
-}
-
-onMounted(() => {
-  window.addEventListener('keydown', onKeydown);
-  closeButton.value?.focus();
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKeydown);
-
-  if (copiedTimer) {
-    clearTimeout(copiedTimer);
-  }
-});
-</script>
-
 <template>
   <div
     class="fixed inset-0 z-40 flex items-end justify-center bg-ink/40"
     @click.self="emit('close')"
   >
     <div
-      class="sheet-panel flex max-h-[90dvh] w-full max-w-md flex-col gap-4 overflow-y-auto rounded-t-[32px] bg-paper px-5 pb-[max(24px,env(safe-area-inset-bottom))] pt-3"
+      class="flex max-h-[90dvh] w-full max-w-md sheet-panel flex-col gap-4 overflow-y-auto rounded-t-[32px] bg-paper px-5 pt-3 pb-[max(24px,env(safe-area-inset-bottom))]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="place-title"
@@ -106,7 +29,7 @@ onBeforeUnmount(() => {
       <div>
         <h2
           id="place-title"
-          class="text-[26px] font-extrabold leading-tight tracking-tight"
+          class="text-[26px] leading-tight font-extrabold tracking-tight"
         >
           {{ props.row.isHotel ? props.row.place.name : props.row.name }}
         </h2>
@@ -116,7 +39,7 @@ onBeforeUnmount(() => {
         >
           <p
             :lang="lang"
-            class="text-[30px] font-bold leading-tight"
+            class="text-[30px] leading-tight font-bold"
           >
             {{ props.row.zh }}
           </p>
@@ -221,3 +144,80 @@ onBeforeUnmount(() => {
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
+import { RouterLink } from 'vue-router';
+import AppIcon from './AppIcon.vue';
+import { appleMapsUrl, directionsLabel, directionsUrl } from '../lib/maps';
+import type { OpenTone } from '../lib/hours';
+import { hotelFor, hotelTarget, taxiLink } from '../lib/plan';
+import type { PlanDay, TripPlan } from '../lib/plan';
+import type { StopRow } from '../lib/route';
+
+const props = defineProps<{
+  row: StopRow
+  plan: TripPlan
+  day: PlanDay
+  kicker: string
+}>();
+
+const emit = defineEmits<{
+  close: []
+  toggle: []
+}>();
+
+const TONES: Record<OpenTone, string> = {
+  open: 'text-open',
+  soon: 'text-soon',
+  later: 'text-ink',
+  closed: 'text-ink'
+};
+const COPIED_MS = 1800;
+let copiedTimer: ReturnType<typeof setTimeout> | null = null;
+
+const copied = ref(false);
+const closeButton = useTemplateRef<HTMLButtonElement>('closeButton');
+
+const lang = computed(() => (props.row.place.city === 'hk' ? 'zh-Hant' : 'zh-Hans'));
+const showZh = computed(() => Boolean(props.row.zh) && props.row.zh !== props.row.name);
+const taxiTarget = computed(() => (props.row.isHotel ? hotelTarget(props.day) : props.row.id));
+const canShowDriver = computed(() => Boolean(props.row.zh) || (props.row.isHotel && Boolean(hotelFor(props.plan, props.day))));
+
+async function copyChinese () {
+  try {
+    await navigator.clipboard.writeText(props.row.zh);
+    copied.value = true;
+
+    if (copiedTimer) {
+      clearTimeout(copiedTimer);
+    }
+
+    copiedTimer = setTimeout(() => {
+      copied.value = false;
+    }, COPIED_MS);
+  } catch {
+    // Clipboard can be refused outside a secure context; the name stays on screen to copy by hand.
+    copied.value = false;
+  }
+}
+
+function onKeydown (event: KeyboardEvent) {
+  if (event.key === 'Escape') {
+    emit('close');
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', onKeydown);
+  closeButton.value?.focus();
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeydown);
+
+  if (copiedTimer) {
+    clearTimeout(copiedTimer);
+  }
+});
+</script>

@@ -1,14 +1,3 @@
-<script setup lang="ts">
-import { RouterLink } from 'vue-router';
-import { dayDate, dayLink } from '../lib/plan';
-import type { TripPlan } from '../lib/plan';
-
-const props = defineProps<{
-  activeIndex: number;
-  plan: TripPlan;
-}>();
-</script>
-
 <template>
   <nav
     aria-label="Trip days"
@@ -25,10 +14,21 @@ const props = defineProps<{
       :aria-label="dayDate(day.isoDate, { weekday: 'long', day: 'numeric', month: 'long' })"
     >
       <span
-        class="text-[10px] font-bold uppercase tracking-wide"
+        class="text-[10px] font-bold tracking-wide uppercase"
         :class="index === props.activeIndex ? 'text-accent-ink' : 'text-muted'"
       >{{ day.weekday }}</span>
-      <span class="text-lg font-bold leading-none tabular-nums">{{ day.date }}</span>
+      <span class="text-lg leading-none font-bold tabular-nums">{{ day.date }}</span>
     </RouterLink>
   </nav>
 </template>
+
+<script setup lang="ts">
+import { RouterLink } from 'vue-router';
+import { dayDate, dayLink } from '../lib/plan';
+import type { TripPlan } from '../lib/plan';
+
+const props = defineProps<{
+  activeIndex: number
+  plan: TripPlan
+}>();
+</script>

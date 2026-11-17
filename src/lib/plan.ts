@@ -4,19 +4,19 @@ import type { City, Hotel, RouteItem, TripDay } from '../data/trip';
 export type Destination = City | 'other';
 export type PlanItem = RouteItem & { id: string };
 export type PlanDay = Omit<TripDay, 'city' | 'items'> & {
-  id: string;
-  isoDate: string;
-  city: Destination;
-  cityName: string;
-  hotel?: Hotel;
-  items: PlanItem[];
+  id: string
+  isoDate: string
+  city: Destination
+  cityName: string
+  hotel?: Hotel
+  items: PlanItem[]
 };
 export interface TripPlan {
-  id: string;
-  title: string;
-  timeZone: string;
-  days: PlanDay[];
-  hotels: Partial<Record<Destination, Hotel>>;
+  id: string
+  title: string
+  timeZone: string
+  days: PlanDay[]
+  hotels: Partial<Record<Destination, Hotel>>
 }
 
 export const ORIGINAL_ID = 'shanghai-hong-kong-2026';

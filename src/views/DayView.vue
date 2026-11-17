@@ -1,3 +1,141 @@
+<template>
+  <main
+    v-if="resolved && day.id === String(route.params.number)"
+    class="mx-auto max-w-md px-4 pb-[calc(var(--tab-clearance)+88px)]"
+  >
+    <header class="sticky top-0 z-20 -mx-4 flex items-center justify-between bg-paper/90 px-2 pt-[max(8px,env(safe-area-inset-top))] pb-2 backdrop-blur-md">
+      <RouterLink
+        :to="{ name: 'days' }"
+        class="flex h-11 items-center gap-1 rounded-full pr-3 pl-1 font-semibold"
+      >
+        <AppIcon name="back" />
+        All days
+      </RouterLink>
+      <RouterLink
+        v-if="homeTarget"
+        :to="homeTarget"
+        class="flex h-11 items-center gap-2 rounded-full bg-card px-4 text-sm font-semibold"
+      >
+        <AppIcon
+          name="home"
+          :size="18"
+          class="text-accent-ink"
+        />
+        Our hotel
+      </RouterLink>
+    </header>
+
+    <section class="pt-2">
+      <img
+        v-if="day.city !== 'other'"
+        :src="SKYLINES[day.city]"
+        alt=""
+        class="-mb-3 ml-auto block w-52"
+      >
+      <p class="font-hand text-[26px] leading-none text-accent-ink">
+        day {{ dayIndex + 1 }} · {{ dayDate(day.isoDate, { weekday: 'short', day: 'numeric', month: 'short' }) }}
+      </p>
+      <h1 class="mt-2 text-[40px] leading-display font-extrabold tracking-tight">{{ day.title }}</h1>
+      <p class="mt-2 text-[15px] leading-snug text-muted">{{ day.areas }}</p>
+    </section>
+
+    <DayStrip
+      class="mt-6"
+      :active-index="dayIndex"
+      :plan="plan"
+    />
+
+    <TimeControl
+      class="mt-4"
+      :minutes="minutes"
+      :live="isLive"
+      :manual="manualMinutes !== null"
+      :city-name="cityName"
+      :summary="summary"
+      @change="setMinutes"
+      @reset="manualMinutes = null"
+    />
+
+    <p
+      v-if="day.headsUp"
+      class="mt-5 flex gap-3 rounded-3xl bg-tint/70 px-5 py-4"
+    >
+      <span class="sr-only">Heads up:</span>
+      <span class="font-hand text-[23px] leading-hand">{{ day.headsUp }}</span>
+    </p>
+
+    <ol
+      class="mt-6"
+      aria-label="Today’s route"
+    >
+      <template
+        v-for="row in dayRoute.rows"
+        :key="row.id"
+      >
+        <RouteLegRow
+          v-if="row.kind === 'leg'"
+          :row="row"
+        />
+        <RouteStopRow
+          v-else
+          :row="row"
+          @toggle="toggleVisited(row.id)"
+          @open="openStop(row.id)"
+        />
+      </template>
+    </ol>
+
+    <div
+      v-if="day.city === 'hk'"
+      class="mt-8 flex items-end justify-center gap-4"
+      aria-hidden="true"
+    >
+      <img
+        :src="eggTart"
+        alt=""
+        class="w-20"
+      >
+      <img
+        :src="dimSum"
+        alt=""
+        class="w-28"
+      >
+      <img
+        :src="eggWaffle"
+        alt=""
+        class="w-12"
+      >
+    </div>
+  </main>
+
+  <main
+    v-else
+    class="mx-auto max-w-md p-6"
+  >
+    <RouterLink :to="{ name: 'days' }">‹ All days</RouterLink><p class="mt-4">This day is unavailable on this device.</p>
+  </main>
+
+  <NextUpBar
+    v-if="resolved && day.id === String(route.params.number)"
+    :next="dayRoute.next"
+    :home-target="homeTarget"
+    @tick="toggleVisited"
+    @open="openStop"
+  />
+
+  <Transition name="sheet">
+    <PlaceSheet
+      v-if="resolved && openRow"
+      :plan="plan"
+      :day="day"
+      :row="openRow"
+      :kicker="sheetKicker"
+      @close="closeStop"
+      @toggle="toggleVisited(openRow.id)"
+    />
+  </Transition>
+</template>
+
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
@@ -101,133 +239,3 @@ watch(day, () => {
   manualMinutes.value = null;
 });
 </script>
-
-<template>
-  <main v-if="resolved && day.id === String(route.params.number)" class="mx-auto max-w-md px-4 pb-[calc(var(--tab-clearance)+88px)]">
-    <header class="sticky top-0 z-20 -mx-4 flex items-center justify-between bg-paper/90 px-2 pb-2 pt-[max(8px,env(safe-area-inset-top))] backdrop-blur-md">
-      <RouterLink
-        :to="{ name: 'days' }"
-        class="flex h-11 items-center gap-1 rounded-full pl-1 pr-3 font-semibold"
-      >
-        <AppIcon name="back" />
-        All days
-      </RouterLink>
-      <RouterLink
-        v-if="homeTarget"
-        :to="homeTarget"
-        class="flex h-11 items-center gap-2 rounded-full bg-card px-4 text-sm font-semibold"
-      >
-        <AppIcon
-          name="home"
-          :size="18"
-          class="text-accent-ink"
-        />
-        Our hotel
-      </RouterLink>
-    </header>
-
-    <section class="pt-2">
-      <img
-        v-if="day.city !== 'other'"
-        :src="SKYLINES[day.city]"
-        alt=""
-        class="-mb-3 ml-auto block w-52"
-      >
-      <p class="font-hand text-[26px] leading-none text-accent-ink">
-        day {{ dayIndex + 1 }} · {{ dayDate(day.isoDate, { weekday: 'short', day: 'numeric', month: 'short' }) }}
-      </p>
-      <h1 class="mt-2 text-[40px] font-extrabold leading-[1.02] tracking-tight">{{ day.title }}</h1>
-      <p class="mt-2 text-[15px] leading-snug text-muted">{{ day.areas }}</p>
-    </section>
-
-    <DayStrip
-      class="mt-6"
-      :active-index="dayIndex"
-      :plan="plan"
-    />
-
-    <TimeControl
-      class="mt-4"
-      :minutes="minutes"
-      :live="isLive"
-      :manual="manualMinutes !== null"
-      :city-name="cityName"
-      :summary="summary"
-      @change="setMinutes"
-      @reset="manualMinutes = null"
-    />
-
-    <p
-      v-if="day.headsUp"
-      class="mt-5 flex gap-3 rounded-3xl bg-tint/70 px-5 py-4"
-    >
-      <span class="sr-only">Heads up:</span>
-      <span class="font-hand text-[23px] leading-[1.15]">{{ day.headsUp }}</span>
-    </p>
-
-    <ol
-      class="mt-6"
-      aria-label="Today’s route"
-    >
-      <template
-        v-for="row in dayRoute.rows"
-        :key="row.id"
-      >
-        <RouteLegRow
-          v-if="row.kind === 'leg'"
-          :row="row"
-        />
-        <RouteStopRow
-          v-else
-          :row="row"
-          @toggle="toggleVisited(row.id)"
-          @open="openStop(row.id)"
-        />
-      </template>
-    </ol>
-
-    <div
-      v-if="day.city === 'hk'"
-      class="mt-8 flex items-end justify-center gap-4"
-      aria-hidden="true"
-    >
-      <img
-        :src="eggTart"
-        alt=""
-        class="w-20"
-      >
-      <img
-        :src="dimSum"
-        alt=""
-        class="w-28"
-      >
-      <img
-        :src="eggWaffle"
-        alt=""
-        class="w-12"
-      >
-    </div>
-  </main>
-
-  <main v-else class="mx-auto max-w-md p-6"><RouterLink :to="{ name: 'days' }">‹ All days</RouterLink><p class="mt-4">This day is unavailable on this device.</p></main>
-
-  <NextUpBar
-    v-if="resolved && day.id === String(route.params.number)"
-    :next="dayRoute.next"
-    :home-target="homeTarget"
-    @tick="toggleVisited"
-    @open="openStop"
-  />
-
-  <Transition name="sheet">
-    <PlaceSheet
-      v-if="resolved && openRow"
-      :plan="plan"
-      :day="day"
-      :row="openRow"
-      :kicker="sheetKicker"
-      @close="closeStop"
-      @toggle="toggleVisited(openRow.id)"
-    />
-  </Transition>
-</template>

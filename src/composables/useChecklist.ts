@@ -6,16 +6,16 @@ import { useWorkspace } from './useWorkspace';
 import type { SharedRecords } from './useWorkspace';
 
 export interface ChecklistDraft {
-  title: string;
-  why: string;
-  reminderAt: string | null;
+  title: string
+  why: string
+  reminderAt: string | null
 }
 
 export interface ChecklistItem extends ChecklistDraft {
-  id: string;
-  done: boolean;
-  notified: boolean;
-  dismissed: boolean;
+  id: string
+  done: boolean
+  notified: boolean
+  dismissed: boolean
 }
 
 const { records, put, storageWarning } = useWorkspace();
@@ -37,15 +37,21 @@ const legacyItems = new Map((Array.isArray(migrated) ? migrated : []).filter(ite
   .map(item => [item.id, item]));
 for (const id of new Set([...PREP.map(item => item.id), ...legacyItems.keys()])) {
   const key = `todo:${ORIGINAL_ID}:${id}`;
-  if (records.value[key] !== undefined) continue;
+  if (records.value[key] !== undefined) {
+    continue;
+  }
   const item = legacyItems.get(id);
   if (!item) {
     initial[key] = null;
   } else {
     const { notified, dismissed, ...shared } = item;
     initial[key] = shared;
-    if (notified) reminderFlags.value[flagKey(key, item.reminderAt, 'notified')] = true;
-    if (dismissed) reminderFlags.value[flagKey(key, item.reminderAt, 'dismissed')] = true;
+    if (notified) {
+      reminderFlags.value[flagKey(key, item.reminderAt, 'notified')] = true;
+    }
+    if (dismissed) {
+      reminderFlags.value[flagKey(key, item.reminderAt, 'dismissed')] = true;
+    }
   }
 }
 if (Object.keys(initial).length) {
@@ -58,7 +64,11 @@ function flagKey (key: string, at: string | null, status: string) {
 }
 
 function saveFlags () {
-  try { localStorage.setItem('two-tickets:reminders:v1', JSON.stringify(reminderFlags.value)); } catch { /* Session only. */ }
+  try {
+    localStorage.setItem('two-tickets:reminders:v1', JSON.stringify(reminderFlags.value));
+  } catch {
+    // Session only.
+  }
 }
 
 export function useChecklist (tripId: () => string = () => ORIGINAL_ID) {
@@ -77,7 +87,9 @@ export function useChecklist (tripId: () => string = () => ORIGINAL_ID) {
   function save (id: string | null, draft: ChecklistDraft) {
     const key = prefix.value + (id ?? newId());
     const item = records.value[key] as ChecklistItem | null | undefined;
-    if (id && !item) return false;
+    if (id && !item) {
+      return false;
+    }
     put({ [key]: { ...draft, id: key.slice(prefix.value.length), done: item?.done ?? false } });
     return true;
   }
@@ -87,11 +99,15 @@ export function useChecklist (tripId: () => string = () => ORIGINAL_ID) {
   function toggle (id: string) {
     const key = prefix.value + id;
     const item = records.value[key] as ChecklistItem | null | undefined;
-    if (item) put({ [key]: { ...item, done: !item.done } });
+    if (item) {
+      put({ [key]: { ...item, done: !item.done } });
+    }
   }
   function markReminder (id: string, at: string, status: 'notified' | 'dismissed') {
     const item = records.value[prefix.value + id] as ChecklistItem | null | undefined;
-    if (item?.reminderAt !== at || item.done) return;
+    if (item?.reminderAt !== at || item.done) {
+      return;
+    }
     reminderFlags.value[flagKey(prefix.value + id, at, status)] = true;
     saveFlags();
   }

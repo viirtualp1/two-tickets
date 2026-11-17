@@ -1,3 +1,9 @@
+<template>
+  <RouterView />
+  <BottomNavigation v-if="showNavigation" />
+  <ChecklistReminder />
+</template>
+
 <script setup lang="ts">
 import { computed, watch } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
@@ -26,7 +32,9 @@ const city = computed<Destination>(() => {
   if (route.name === 'taxi') {
     const target = String(route.params.target);
 
-    if (target.startsWith('hotel-day-')) return routePlan.value?.days.find(day => day.id === target.slice(10))?.city ?? 'sh';
+    if (target.startsWith('hotel-day-')) {
+      return routePlan.value?.days.find(day => day.id === target.slice(10))?.city ?? 'sh';
+    }
     if (target.startsWith('hotel-')) {
       return target === 'hotel-hk' ? 'hk' : 'sh';
     }
@@ -42,9 +50,3 @@ watch(city, value => {
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', value === 'hk' ? '#f1f7f3' : '#fff6f3');
 }, { immediate: true });
 </script>
-
-<template>
-  <RouterView />
-  <BottomNavigation v-if="showNavigation" />
-  <ChecklistReminder />
-</template>

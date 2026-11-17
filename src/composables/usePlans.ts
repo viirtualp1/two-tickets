@@ -6,7 +6,11 @@ import type { TripPlan } from '../lib/plan';
 
 const ACTIVE_KEY = 'two-tickets:active-trip';
 const chosen = ref(ORIGINAL_ID);
-try { chosen.value = localStorage.getItem(ACTIVE_KEY) ?? ORIGINAL_ID; } catch { /* Use the bundled trip. */ }
+try {
+  chosen.value = localStorage.getItem(ACTIVE_KEY) ?? ORIGINAL_ID;
+} catch {
+  // Use the bundled trip.
+}
 const { records, put } = useWorkspace();
 const plans = computed(() => [
   originalPlan,

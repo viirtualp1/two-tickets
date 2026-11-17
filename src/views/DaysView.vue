@@ -1,37 +1,7 @@
-<script setup lang="ts">
-import { computed } from 'vue';
-import { RouterLink } from 'vue-router';
-import AppIcon from '../components/AppIcon.vue';
-import DayTicket from '../components/DayTicket.vue';
-import { usePlans } from '../composables/usePlans';
-import { useProgress } from '../composables/useProgress';
-import { useTripClock } from '../composables/useTripClock';
-import { hotelFor, hotelTarget, ORIGINAL_ID, taxiLink } from '../lib/plan';
-import { dayProgress } from '../lib/route';
-import type { Hotel } from '../data/trip';
-
-const { activePlan: plan } = usePlans();
-const { visited } = useProgress(() => plan.value);
-const clock = useTripClock(() => plan.value);
-const original = computed(() => plan.value.id === ORIGINAL_ID);
-const progress = computed(() => plan.value.days.map(day => dayProgress(day, visited.value)));
-const hotels = computed(() => {
-  const unique = new Map<string, { hotel: Hotel; target: string; city: string }>();
-  for (const day of plan.value.days) {
-    const hotel = hotelFor(plan.value, day);
-    if (!hotel) continue;
-
-    const key = `${day.cityName}:${hotel.name}:${hotel.near}`;
-    if (!unique.has(key)) unique.set(key, { hotel, target: hotelTarget(day), city: day.cityName });
-  }
-  return [...unique.values()];
-});
-</script>
-
 <template>
-  <main class="mx-auto flex max-w-md flex-col gap-7 px-4 pb-[var(--tab-clearance)] pt-[max(18px,env(safe-area-inset-top))]">
+  <main class="mx-auto flex max-w-md flex-col gap-7 px-4 pt-[max(18px,env(safe-area-inset-top))] pb-(--tab-clearance)">
     <header class="px-1">
-      <h1 class="text-[36px] font-extrabold leading-tight tracking-tight">Days</h1>
+      <h1 class="text-[36px] leading-tight font-extrabold tracking-tight">Days</h1>
       <p class="mt-0.5 text-sm font-semibold text-muted">{{ plan.title }}</p>
     </header>
 
@@ -66,7 +36,10 @@ const hotels = computed(() => {
       </ol>
     </section>
 
-    <section v-if="hotels.length" aria-labelledby="taxi-title">
+    <section
+      v-if="hotels.length"
+      aria-labelledby="taxi-title"
+    >
       <h2
         id="taxi-title"
         class="px-1 text-2xl font-extrabold tracking-tight"
@@ -101,6 +74,39 @@ const hotels = computed(() => {
         </li>
       </ul>
     </section>
-
   </main>
 </template>
+
+<script setup lang="ts">
+import { computed } from 'vue';
+import { RouterLink } from 'vue-router';
+import AppIcon from '../components/AppIcon.vue';
+import DayTicket from '../components/DayTicket.vue';
+import { usePlans } from '../composables/usePlans';
+import { useProgress } from '../composables/useProgress';
+import { useTripClock } from '../composables/useTripClock';
+import { hotelFor, hotelTarget, ORIGINAL_ID, taxiLink } from '../lib/plan';
+import { dayProgress } from '../lib/route';
+import type { Hotel } from '../data/trip';
+
+const { activePlan: plan } = usePlans();
+const { visited } = useProgress(() => plan.value);
+const clock = useTripClock(() => plan.value);
+const original = computed(() => plan.value.id === ORIGINAL_ID);
+const progress = computed(() => plan.value.days.map(day => dayProgress(day, visited.value)));
+const hotels = computed(() => {
+  const unique = new Map<string, { hotel: Hotel, target: string, city: string }>();
+  for (const day of plan.value.days) {
+    const hotel = hotelFor(plan.value, day);
+    if (!hotel) {
+      continue;
+    }
+
+    const key = `${day.cityName}:${hotel.name}:${hotel.near}`;
+    if (!unique.has(key)) {
+      unique.set(key, { hotel, target: hotelTarget(day), city: day.cityName });
+    }
+  }
+  return [...unique.values()];
+});
+</script>

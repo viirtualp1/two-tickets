@@ -5,49 +5,49 @@ import type { Leg, LegMode, RouteItem } from '../data/trip';
 import type { OpenStatus } from './hours';
 
 export interface Place {
-  name: string;
-  zh: string;
-  city: Destination;
-  cityName: string;
+  name: string
+  zh: string
+  city: Destination
+  cityName: string
 }
 
 export interface LegRow {
-  kind: 'leg';
-  id: string;
-  mode: LegMode;
-  text: string;
-  detail: string;
-  at: string;
+  kind: 'leg'
+  id: string
+  mode: LegMode
+  text: string
+  detail: string
+  at: string
 }
 
 export interface StopRow {
-  kind: 'stop';
-  id: string;
-  name: string;
-  zh: string;
-  note: string;
-  at: string;
-  hours: string;
-  status: OpenStatus | null;
-  via: string;
-  visited: boolean;
-  isNext: boolean;
-  isHotel: boolean;
-  place: Place;
+  kind: 'stop'
+  id: string
+  name: string
+  zh: string
+  note: string
+  at: string
+  hours: string
+  status: OpenStatus | null
+  via: string
+  visited: boolean
+  isNext: boolean
+  isHotel: boolean
+  place: Place
 }
 
 export type RouteRow = LegRow | StopRow;
 
 export interface DayRoute {
-  rows: RouteRow[];
-  next: StopRow | null;
-  counts: Record<OpenStatus['tone'], number>;
-  withHours: number;
+  rows: RouteRow[]
+  next: StopRow | null
+  counts: Record<OpenStatus['tone'], number>
+  withHours: number
 }
 
 export interface DayProgress {
-  done: number;
-  total: number;
+  done: number
+  total: number
 }
 
 export function legSummary (item: Leg) {
@@ -65,7 +65,9 @@ export function placeFor (item: Exclude<RouteItem, Leg>, day: PlanDay, plan: Tri
 export function findPlace (id: string, plan: TripPlan) {
   for (const day of plan.days) {
     const item = day.items.find(row => row.id === id);
-    if (item && item.kind !== 'leg') return placeFor(item, day, plan);
+    if (item && item.kind !== 'leg') {
+      return placeFor(item, day, plan);
+    }
   }
   return null;
 }

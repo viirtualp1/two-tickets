@@ -11,7 +11,7 @@ const { conflicts, setConflicts } = useWorkspace();
 let running: Promise<void> | null = null;
 let scheduled: number | undefined;
 let started = false;
-let pendingOwner: { room: string; token: string; owner: true } | undefined;
+let pendingOwner: { room: string, token: string, owner: true } | undefined;
 const joiningTokens = new Map<string, string>();
 
 class SyncError extends Error {
@@ -28,25 +28,31 @@ async function request<T> (body: object): Promise<T> {
     signal: AbortSignal.timeout(45_000)
   });
   const result = await response.json().catch(() => null);
-  if (!response.ok || !result) throw new SyncError(result?.error ?? 'The server is unavailable.', response.status);
+  if (!response.ok || !result) {
+    throw new SyncError(result?.error ?? 'The server is unavailable.', response.status);
+  }
   return result as T;
 }
 
 interface Snapshot {
-  records: SharedRecords;
-  version: number;
-  paired: boolean;
-  conflicts: SharedRecords;
+  records: SharedRecords
+  version: number
+  paired: boolean
+  conflicts: SharedRecords
 }
 
 function sync () {
-  if (!connection.value || running) return running;
+  if (!connection.value || running) {
+    return running;
+  }
 
   const start = current();
   const patch: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(start.records)) {
     const previous = start.base[key] ?? null;
-    if (!same(previous, value)) patch[key] = [previous, value];
+    if (!same(previous, value)) {
+      patch[key] = [previous, value];
+    }
   }
   status.value = 'Syncing…';
   running = (async () => {
@@ -74,13 +80,23 @@ function schedule () {
 }
 
 export function startTripSync () {
-  if (started) return;
+  if (started) {
+    return;
+  }
   started = true;
   watch(records, schedule);
   window.addEventListener('online', schedule);
   window.addEventListener('focus', schedule);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) schedule(); });
-  window.setInterval(() => { if (!document.hidden) void sync(); }, 15_000);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      schedule();
+    }
+  });
+  window.setInterval(() => {
+    if (!document.hidden) {
+      void sync();
+    }
+  }, 15_000);
   void sync();
 }
 
@@ -111,7 +127,9 @@ export function useTripSync () {
   }
 
   async function join (room: string, invite: string) {
-    if (connection.value) throw new Error('Disconnect this device before joining another workspace.');
+    if (connection.value) {
+      throw new Error('Disconnect this device before joining another workspace.');
+    }
     const token = joiningTokens.get(room) ?? newId() + newId();
     joiningTokens.set(room, token);
     const credential = { room, token, owner: false };
@@ -129,7 +147,9 @@ export function useTripSync () {
     try {
       await request({ ...current().connection, action: 'leave' });
     } catch (error) {
-      if (!(error instanceof SyncError) || ![401, 404].includes(error.status)) throw error;
+      if (!(error instanceof SyncError) || ![401, 404].includes(error.status)) {
+        throw error;
+      }
     }
     useWorkspace().disconnect();
     paired.value = false;

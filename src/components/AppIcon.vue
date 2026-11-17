@@ -1,13 +1,32 @@
+<!-- eslint-disable vue/no-v-html -- markup comes from the bundled icon map, never user input -->
+<template>
+  <svg
+    :width="props.size"
+    :height="props.size"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    :stroke-width="props.stroke"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    :role="props.label ? 'img' : undefined"
+    :aria-label="props.label || undefined"
+    :aria-hidden="props.label ? undefined : 'true'"
+    class="shrink-0"
+    v-html="markup"
+  />
+</template>
+
 <script setup lang="ts">
 import { computed } from 'vue';
 
 export type IconName = 'metro' | 'walk' | 'flight' | 'transfer' | 'home' | 'back' | 'forward' | 'close' | 'check' | 'pin' | 'copy' | 'talk' | 'heart' | 'clock' | 'plus' | 'edit' | 'calendar' | 'settings' | 'sync';
 
 const props = withDefaults(defineProps<{
-  name: IconName;
-  size?: number;
-  stroke?: number;
-  label?: string;
+  name: IconName
+  size?: number
+  stroke?: number
+  label?: string
 }>(), {
   size: 20,
   stroke: 1.9,
@@ -38,21 +57,3 @@ const PATHS: Record<IconName, string> = {
 
 const markup = computed(() => PATHS[props.name]);
 </script>
-
-<template>
-  <svg
-    :width="props.size"
-    :height="props.size"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    :stroke-width="props.stroke"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    :role="props.label ? 'img' : undefined"
-    :aria-label="props.label || undefined"
-    :aria-hidden="props.label ? undefined : 'true'"
-    class="shrink-0"
-    v-html="markup"
-  />
-</template>

@@ -4,17 +4,17 @@ export type SharedValue = object | boolean | null;
 export type SharedRecords = Record<string, SharedValue>;
 
 interface Connection {
-  room: string;
-  token: string;
-  owner: boolean;
+  room: string
+  token: string
+  owner: boolean
 }
 
 interface Workspace {
-  records: SharedRecords;
-  base: SharedRecords;
-  version: number;
-  connection: Connection | null;
-  conflicts?: SharedRecords;
+  records: SharedRecords
+  base: SharedRecords
+  version: number
+  connection: Connection | null
+  conflicts?: SharedRecords
 }
 
 const STORAGE_KEY = 'two-tickets:workspace:v1';
@@ -70,7 +70,9 @@ window.addEventListener('storage', event => {
 function put (updates: SharedRecords) {
   const state = current();
   const conflicts = { ...state.conflicts };
-  for (const key of Object.keys(updates)) delete conflicts[key];
+  for (const key of Object.keys(updates)) {
+    delete conflicts[key];
+  }
   write({ ...state, records: { ...state.records, ...updates }, conflicts });
 }
 
@@ -78,7 +80,9 @@ function connect (next: Connection, remote: SharedRecords = {}, version = 0, pre
   const state = current();
   const conflicts: SharedRecords = {};
   for (const [key, value] of Object.entries(preferredLocal)) {
-    if (remote[key] !== undefined && !same(remote[key], value)) conflicts[key] = value;
+    if (remote[key] !== undefined && !same(remote[key], value)) {
+      conflicts[key] = value;
+    }
   }
   write({ records: { ...state.records, ...remote }, base: remote, version, connection: next, conflicts });
 }

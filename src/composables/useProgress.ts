@@ -7,7 +7,7 @@ import type { SharedRecords } from './useWorkspace';
 const { records, put } = useWorkspace();
 const legacy = readLegacy();
 
-function readLegacy (): { visited?: Record<string, boolean>; prep?: Record<string, boolean> } {
+function readLegacy (): { visited?: Record<string, boolean>, prep?: Record<string, boolean> } {
   try {
     return JSON.parse(localStorage.getItem('two-tickets:v1') ?? '{}') ?? {};
   } catch {
@@ -18,9 +18,13 @@ function readLegacy (): { visited?: Record<string, boolean>; prep?: Record<strin
 const migration: SharedRecords = {};
 for (const [id, visited] of Object.entries(legacy.visited ?? {})) {
   const key = `visit:${ORIGINAL_ID}:${id}`;
-  if (visited === true && records.value[key] === undefined) migration[key] = true;
+  if (visited === true && records.value[key] === undefined) {
+    migration[key] = true;
+  }
 }
-if (Object.keys(migration).length) put(migration);
+if (Object.keys(migration).length) {
+  put(migration);
+}
 
 export function useProgress (plan: () => TripPlan | undefined) {
   const visited = computed(() => {
@@ -30,7 +34,9 @@ export function useProgress (plan: () => TripPlan | undefined) {
   });
   function toggleVisited (id: string) {
     const trip = plan();
-    if (trip) put({ [`visit:${trip.id}:${id}`]: !visited.value[id] });
+    if (trip) {
+      put({ [`visit:${trip.id}:${id}`]: !visited.value[id] });
+    }
   }
   return { visited, toggleVisited };
 }

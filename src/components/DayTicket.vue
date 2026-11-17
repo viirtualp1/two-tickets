@@ -1,51 +1,24 @@
-<script setup lang="ts">
-import { computed } from 'vue';
-import { RouterLink } from 'vue-router';
-import { dayDate, dayLink } from '../lib/plan';
-import type { PlanDay, TripPlan } from '../lib/plan';
-import type { DayProgress } from '../lib/route';
-
-const props = defineProps<{
-  plan: TripPlan;
-  day: PlanDay;
-  progress: DayProgress;
-  isToday: boolean;
-}>();
-
-const progressText = computed(() => {
-  const { done, total } = props.progress;
-
-  if (done) {
-    return `${done} of ${total}`;
-  }
-
-  return total === 1 ? '1 place' : `${total} places`;
-});
-
-const progressWidth = computed(() => `${props.progress.total ? (props.progress.done / props.progress.total) * 100 : 0}%`);
-</script>
-
 <template>
   <RouterLink
     :to="dayLink(props.plan, props.day)"
-    class="lift block rounded-3xl"
+    class="block rounded-3xl lift"
   >
     <span
-      class="ticket relative grid min-h-24 grid-cols-[88px_1fr] rounded-3xl bg-card"
+      class="relative grid min-h-24 grid-cols-[88px_1fr] rounded-3xl bg-card ticket"
       :class="props.isToday ? 'ring-2 ring-inset ring-accent' : ''"
     >
       <span class="flex flex-col items-center justify-center py-3">
-        <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">{{ props.day.weekday }}</span>
-        <span class="text-[34px] font-extrabold leading-none tabular-nums">{{ props.day.date }}</span>
-        <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">{{ dayDate(props.day.isoDate, { month: 'short' }) }}</span>
+        <span class="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">{{ props.day.weekday }}</span>
+        <span class="text-[34px] leading-none font-extrabold tabular-nums">{{ props.day.date }}</span>
+        <span class="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">{{ dayDate(props.day.isoDate, { month: 'short' }) }}</span>
       </span>
       <span
         class="absolute inset-y-3 left-[87px] border-l-2 border-dashed border-line"
         aria-hidden="true"
       />
-      <span class="flex min-w-0 flex-col gap-1 py-3.5 pl-4 pr-5">
+      <span class="flex min-w-0 flex-col gap-1 py-3.5 pr-5 pl-4">
         <span class="flex items-baseline justify-between gap-3">
-          <span class="text-[17px] font-bold leading-snug">{{ props.day.title }}</span>
+          <span class="text-[17px] leading-snug font-bold">{{ props.day.title }}</span>
           <span class="shrink-0 text-xs text-muted">{{ progressText }}</span>
         </span>
         <span class="text-[13px] leading-snug text-muted">{{ props.day.areas }}</span>
@@ -67,3 +40,30 @@ const progressWidth = computed(() => `${props.progress.total ? (props.progress.d
     </span>
   </RouterLink>
 </template>
+
+<script setup lang="ts">
+import { computed } from 'vue';
+import { RouterLink } from 'vue-router';
+import { dayDate, dayLink } from '../lib/plan';
+import type { PlanDay, TripPlan } from '../lib/plan';
+import type { DayProgress } from '../lib/route';
+
+const props = defineProps<{
+  plan: TripPlan
+  day: PlanDay
+  progress: DayProgress
+  isToday: boolean
+}>();
+
+const progressText = computed(() => {
+  const { done, total } = props.progress;
+
+  if (done) {
+    return `${done} of ${total}`;
+  }
+
+  return total === 1 ? '1 place' : `${total} places`;
+});
+
+const progressWidth = computed(() => `${props.progress.total ? (props.progress.done / props.progress.total) * 100 : 0}%`);
+</script>

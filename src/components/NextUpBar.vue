@@ -1,24 +1,3 @@
-<script setup lang="ts">
-import { computed } from 'vue';
-import { RouterLink } from 'vue-router';
-import type { RouteLocationRaw } from 'vue-router';
-import AppIcon from './AppIcon.vue';
-import { directionsUrl } from '../lib/maps';
-import type { StopRow } from '../lib/route';
-
-const props = defineProps<{
-  next: StopRow | null;
-  homeTarget: RouteLocationRaw | null;
-}>();
-
-const emit = defineEmits<{
-  tick: [id: string];
-  open: [id: string];
-}>();
-
-const goUrl = computed(() => (props.next ? directionsUrl(props.next.place) : ''));
-</script>
-
 <template>
   <div class="pointer-events-none fixed inset-x-0 bottom-[calc(var(--tab-clearance)-8px)] z-30 px-3">
     <div class="pointer-events-auto mx-auto flex max-w-md items-center gap-2 rounded-[30px] bg-card p-2.5 shadow-[0_14px_34px_rgb(60_30_30/0.18)]">
@@ -77,3 +56,24 @@ const goUrl = computed(() => (props.next ? directionsUrl(props.next.place) : '')
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { computed } from 'vue';
+import { RouterLink } from 'vue-router';
+import type { RouteLocationRaw } from 'vue-router';
+import AppIcon from './AppIcon.vue';
+import { directionsUrl } from '../lib/maps';
+import type { StopRow } from '../lib/route';
+
+const props = defineProps<{
+  next: StopRow | null
+  homeTarget: RouteLocationRaw | null
+}>();
+
+const emit = defineEmits<{
+  tick: [id: string]
+  open: [id: string]
+}>();
+
+const goUrl = computed(() => (props.next ? directionsUrl(props.next.place) : ''));
+</script>

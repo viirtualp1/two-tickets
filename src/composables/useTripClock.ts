@@ -11,8 +11,12 @@ let ticking = false;
 export function useTripClock (trip: () => TripPlan) {
   if (!ticking && !previewMatch) {
     ticking = true;
-    window.setInterval(() => { now.value = Date.now(); }, 30_000);
-    document.addEventListener('visibilitychange', () => { now.value = Date.now(); });
+    window.setInterval(() => {
+      now.value = Date.now();
+    }, 30_000);
+    document.addEventListener('visibilitychange', () => {
+      now.value = Date.now();
+    });
   }
 
   return computed(() => {

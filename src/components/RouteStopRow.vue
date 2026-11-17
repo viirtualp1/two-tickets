@@ -1,44 +1,3 @@
-<script setup lang="ts">
-import { computed } from 'vue';
-import AppIcon from './AppIcon.vue';
-import type { OpenTone } from '../lib/hours';
-import type { StopRow } from '../lib/route';
-
-const props = defineProps<{
-  row: StopRow;
-}>();
-
-const emit = defineEmits<{
-  toggle: [];
-  open: [];
-}>();
-
-const TONES: Record<OpenTone, string> = {
-  open: 'text-open',
-  soon: 'text-soon',
-  later: 'text-muted',
-  closed: 'text-muted'
-};
-
-const ring = computed(() => {
-  if (props.row.visited) {
-    return 'border-accent bg-accent text-white';
-  }
-
-  return props.row.isNext ? 'breathe border-accent bg-card text-transparent' : 'border-muted/60 bg-card text-transparent';
-});
-
-const card = computed(() => {
-  if (props.row.isNext) {
-    return 'bg-card ring-2 ring-accent shadow-[0_6px_18px_rgb(120_70_60/0.10)]';
-  }
-
-  return props.row.visited ? 'bg-transparent' : 'bg-card/70';
-});
-
-const showZh = computed(() => Boolean(props.row.zh) && props.row.zh !== props.row.name);
-</script>
-
 <template>
   <li class="grid grid-cols-[44px_1fr] gap-3">
     <span class="relative flex justify-center">
@@ -77,7 +36,7 @@ const showZh = computed(() => Boolean(props.row.zh) && props.row.zh !== props.ro
       >next up</span>
       <span class="flex items-baseline justify-between gap-3">
         <span
-          class="flex items-baseline gap-1.5 text-base font-bold leading-snug"
+          class="flex items-baseline gap-1.5 text-base leading-snug font-bold"
           :class="props.row.visited ? 'text-muted line-through decoration-muted/40' : ''"
         >
           <AppIcon
@@ -90,7 +49,7 @@ const showZh = computed(() => Boolean(props.row.zh) && props.row.zh !== props.ro
         </span>
         <span
           v-if="props.row.at"
-          class="whitespace-nowrap font-hand text-[22px] leading-none"
+          class="font-hand text-[22px] leading-none whitespace-nowrap"
         >{{ props.row.at }}</span>
       </span>
       <span
@@ -114,3 +73,44 @@ const showZh = computed(() => Boolean(props.row.zh) && props.row.zh !== props.ro
     </button>
   </li>
 </template>
+
+<script setup lang="ts">
+import { computed } from 'vue';
+import AppIcon from './AppIcon.vue';
+import type { OpenTone } from '../lib/hours';
+import type { StopRow } from '../lib/route';
+
+const props = defineProps<{
+  row: StopRow
+}>();
+
+const emit = defineEmits<{
+  toggle: []
+  open: []
+}>();
+
+const TONES: Record<OpenTone, string> = {
+  open: 'text-open',
+  soon: 'text-soon',
+  later: 'text-muted',
+  closed: 'text-muted'
+};
+
+const ring = computed(() => {
+  if (props.row.visited) {
+    return 'border-accent bg-accent text-white';
+  }
+
+  return props.row.isNext ? 'animate-breathe border-accent bg-card text-transparent' : 'border-muted/60 bg-card text-transparent';
+});
+
+const card = computed(() => {
+  if (props.row.isNext) {
+    return 'bg-card ring-2 ring-accent shadow-[0_6px_18px_rgb(120_70_60/0.10)]';
+  }
+
+  return props.row.visited ? 'bg-transparent' : 'bg-card/70';
+});
+
+const showZh = computed(() => Boolean(props.row.zh) && props.row.zh !== props.row.name);
+</script>

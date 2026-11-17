@@ -8,14 +8,22 @@ const day = object({ ...strings(['date', 'title', 'city', 'start', 'note', 'hote
 const schema = object({ ...strings(['title', 'timeZone']), days: { type: 'array', items: day } });
 
 export async function extractTrip (request) {
-  if (Number(request.headers.get('content-length')) > 4_300_000) throw new ApiError(413, 'Choose a file under 4 MB.');
+  if (Number(request.headers.get('content-length')) > 4_300_000) {
+    throw new ApiError(413, 'Choose a file under 4 MB.');
+  }
   const buffer = await request.arrayBuffer();
-  if (buffer.byteLength > 4_300_000) throw new ApiError(413, 'Choose a file under 4 MB.');
+  if (buffer.byteLength > 4_300_000) {
+    throw new ApiError(413, 'Choose a file under 4 MB.');
+  }
   const form = await new Response(buffer, { headers: { 'Content-Type': request.headers.get('content-type') ?? '' } })
-    .formData().catch(() => { throw new ApiError(400, 'Choose a supported file.'); });
+    .formData().catch(() => {
+      throw new ApiError(400, 'Choose a supported file.');
+    });
   requireSetupCode(form.get('code'));
   const key = process.env.OPENAI_API_KEY;
-  if (!key) throw new ApiError(503, 'File import requires an OpenAI API key on the server.');
+  if (!key) {
+    throw new ApiError(503, 'File import requires an OpenAI API key on the server.');
+  }
 
   const file = form.get('file');
   const mime = typeof file === 'object' && file?.type;
@@ -31,7 +39,9 @@ export async function extractTrip (request) {
     'image/png': bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])),
     'image/webp': bytes.subarray(0, 4).toString() === 'RIFF' && bytes.subarray(8, 12).toString() === 'WEBP'
   };
-  if (!signatures[mime]) throw new ApiError(400, 'The file does not match its selected type.');
+  if (!signatures[mime]) {
+    throw new ApiError(400, 'The file does not match its selected type.');
+  }
 
   const data = `data:${mime};base64,${bytes.toString('base64')}`;
   const attachment = mime === 'application/pdf'
@@ -40,7 +50,7 @@ export async function extractTrip (request) {
   const response = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
     signal: AbortSignal.timeout(40_000),
-    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: process.env.TRIP_IMPORT_MODEL || 'gpt-4.1-mini',
       store: false,
@@ -55,6 +65,8 @@ export async function extractTrip (request) {
     throw new ApiError(502, 'The file could not be read. Try a smaller file or paste the relevant notes.');
   }
   const output = answer.output?.flatMap(entry => entry.content ?? []).find(entry => entry.type === 'output_text');
-  if (!output?.text) throw new ApiError(422, 'No readable itinerary was found.');
+  if (!output?.text) {
+    throw new ApiError(422, 'No readable itinerary was found.');
+  }
   return JSON.parse(output.text);
 }

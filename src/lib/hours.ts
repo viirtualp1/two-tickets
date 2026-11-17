@@ -1,8 +1,8 @@
 export type OpenTone = 'open' | 'soon' | 'later' | 'closed';
 
 export interface OpenStatus {
-  tone: OpenTone;
-  text: string;
+  tone: OpenTone
+  text: string
 }
 
 const MINUTES_PER_DAY = 1440;

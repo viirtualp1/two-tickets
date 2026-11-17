@@ -1,31 +1,3 @@
-<script setup lang="ts">
-import { computed } from 'vue';
-import AppIcon from './AppIcon.vue';
-import type { LegMode } from '../data/trip';
-import type { LegRow } from '../lib/route';
-
-const props = defineProps<{
-  row: LegRow;
-}>();
-
-const RAILS: Record<LegMode, string> = {
-  metro: 'w-[3px] bg-accent',
-  walk: 'border-l-[3px] border-dotted border-accent/60',
-  flight: 'border-l-2 border-dashed border-muted/50',
-  transfer: 'border-l-[3px] border-dotted border-muted/50'
-};
-
-const LABELS: Record<LegMode, string> = {
-  metro: 'Metro',
-  walk: 'Walk',
-  flight: 'Flight',
-  transfer: 'Transfer'
-};
-
-const rail = computed(() => RAILS[props.row.mode]);
-const iconTone = computed(() => (props.row.mode === 'metro' || props.row.mode === 'walk' ? 'text-accent-ink' : 'text-muted'));
-</script>
-
 <template>
   <li class="grid grid-cols-[44px_1fr_auto] items-center gap-3">
     <span class="relative flex min-h-14 justify-center self-stretch">
@@ -55,3 +27,31 @@ const iconTone = computed(() => (props.row.mode === 'metro' || props.row.mode ==
     >{{ props.row.at }}</span>
   </li>
 </template>
+
+<script setup lang="ts">
+import { computed } from 'vue';
+import AppIcon from './AppIcon.vue';
+import type { LegMode } from '../data/trip';
+import type { LegRow } from '../lib/route';
+
+const props = defineProps<{
+  row: LegRow
+}>();
+
+const RAILS: Record<LegMode, string> = {
+  metro: 'w-[3px] bg-accent',
+  walk: 'border-l-[3px] border-dotted border-accent/60',
+  flight: 'border-l-2 border-dashed border-muted/50',
+  transfer: 'border-l-[3px] border-dotted border-muted/50'
+};
+
+const LABELS: Record<LegMode, string> = {
+  metro: 'Metro',
+  walk: 'Walk',
+  flight: 'Flight',
+  transfer: 'Transfer'
+};
+
+const rail = computed(() => RAILS[props.row.mode]);
+const iconTone = computed(() => (props.row.mode === 'metro' || props.row.mode === 'walk' ? 'text-accent-ink' : 'text-muted'));
+</script>

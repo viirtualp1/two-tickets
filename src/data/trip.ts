@@ -3,54 +3,54 @@ export type City = 'sh' | 'hk';
 export type LegMode = 'metro' | 'walk' | 'flight' | 'transfer';
 
 export interface Leg {
-  kind: 'leg';
-  mode: LegMode;
-  text: string;
-  detail: string;
-  at: string;
+  kind: 'leg'
+  mode: LegMode
+  text: string
+  detail: string
+  at: string
 }
 
 export interface Stop {
-  kind: 'stop';
-  name: string;
-  zh: string;
-  hours: string;
-  note: string;
-  at: string;
-  city: City | null;
+  kind: 'stop'
+  name: string
+  zh: string
+  hours: string
+  note: string
+  at: string
+  city: City | null
 }
 
 export interface HotelStop {
-  kind: 'hotel';
-  note: string;
-  at: string;
+  kind: 'hotel'
+  note: string
+  at: string
 }
 
 export type RouteItem = Leg | Stop | HotelStop;
 
 export interface TripDay {
-  date: number;
-  weekday: string;
-  city: City;
-  title: string;
-  areas: string;
-  start: string;
-  headsUp: string;
-  items: RouteItem[];
+  date: number
+  weekday: string
+  city: City
+  title: string
+  areas: string
+  start: string
+  headsUp: string
+  items: RouteItem[]
 }
 
 export interface Hotel {
-  short: string;
-  name: string;
-  zh: string;
-  near: string;
-  nights: string;
+  short: string
+  name: string
+  zh: string
+  near: string
+  nights: string
 }
 
 export interface PrepItem {
-  id: string;
-  title: string;
-  why: string;
+  id: string
+  title: string
+  why: string
 }
 
 export const CITY_NAMES: Record<City, string> = {
@@ -75,7 +75,7 @@ export const HOTELS: Record<City, Hotel> = {
   }
 };
 
-export const TAXI_PHRASES: Record<City, { zh: string; en: string }> = {
+export const TAXI_PHRASES: Record<City, { zh: string, en: string }> = {
   sh: { zh: '师傅，请带我们去这里。', en: 'Driver, please take us here.' },
   hk: { zh: '唔該，我哋想去呢度。', en: 'Excuse me, we’d like to go here.' }
 };
