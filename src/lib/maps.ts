@@ -3,7 +3,8 @@ import type { Place } from './route';
 const SHANGHAI_CITY_CODE = '310000';
 const CITY_CENTRES = {
   sh: '31.2304,121.4737',
-  hk: '22.2800,114.1700'
+  hk: '22.2800,114.1700',
+  bkk: '13.7563,100.5018'
 };
 
 export function directionsUrl (place: Place) {

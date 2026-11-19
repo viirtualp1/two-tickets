@@ -1,7 +1,8 @@
 <template>
   <nav
+    ref="strip"
     aria-label="Trip days"
-    class="flex gap-1 overflow-x-auto"
+    class="relative flex gap-1 overflow-x-auto"
   >
     <RouterLink
       v-for="(day, index) in props.plan.days"
@@ -23,6 +24,7 @@
 </template>
 
 <script setup lang="ts">
+import { nextTick, onMounted, useTemplateRef, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import { dayDate, dayLink } from '../lib/plan';
 import type { TripPlan } from '../lib/plan';
@@ -31,4 +33,26 @@ const props = defineProps<{
   activeIndex: number
   plan: TripPlan
 }>();
+
+const strip = useTemplateRef<HTMLElement>('strip');
+
+async function centreActiveDay (behavior: ScrollBehavior) {
+  await nextTick();
+
+  const active = strip.value?.querySelector<HTMLElement>('[aria-current="page"]');
+
+  if (!strip.value || !active) {
+    return;
+  }
+
+  strip.value.scrollTo({ left: active.offsetLeft - (strip.value.clientWidth - active.offsetWidth) / 2, behavior });
+}
+
+watch(() => props.activeIndex, () => {
+  centreActiveDay('smooth');
+});
+
+onMounted(() => {
+  centreActiveDay('instant');
+});
 </script>

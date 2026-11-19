@@ -41,6 +41,7 @@ const props = defineProps<{
 const RAILS: Record<LegMode, string> = {
   metro: 'w-[3px] bg-accent',
   walk: 'border-l-[3px] border-dotted border-accent/60',
+  ferry: 'border-l-[3px] border-dashed border-accent/70',
   flight: 'border-l-2 border-dashed border-muted/50',
   transfer: 'border-l-[3px] border-dotted border-muted/50'
 };
@@ -48,10 +49,11 @@ const RAILS: Record<LegMode, string> = {
 const LABELS: Record<LegMode, string> = {
   metro: 'Metro',
   walk: 'Walk',
+  ferry: 'Ferry',
   flight: 'Flight',
   transfer: 'Transfer'
 };
 
 const rail = computed(() => RAILS[props.row.mode]);
-const iconTone = computed(() => (props.row.mode === 'metro' || props.row.mode === 'walk' ? 'text-accent-ink' : 'text-muted'));
+const iconTone = computed(() => (props.row.mode === 'metro' || props.row.mode === 'walk' || props.row.mode === 'ferry' ? 'text-accent-ink' : 'text-muted'));
 </script>

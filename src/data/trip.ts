@@ -1,6 +1,6 @@
-export type City = 'sh' | 'hk';
+export type City = 'sh' | 'hk' | 'bkk';
 
-export type LegMode = 'metro' | 'walk' | 'flight' | 'transfer';
+export type LegMode = 'metro' | 'walk' | 'ferry' | 'flight' | 'transfer';
 
 export interface Leg {
   kind: 'leg'
@@ -24,6 +24,7 @@ export interface HotelStop {
   kind: 'hotel'
   note: string
   at: string
+  city: City | null
 }
 
 export type RouteItem = Leg | Stop | HotelStop;
@@ -55,7 +56,26 @@ export interface PrepItem {
 
 export const CITY_NAMES: Record<City, string> = {
   sh: 'Shanghai',
-  hk: 'Hong Kong'
+  hk: 'Hong Kong',
+  bkk: 'Bangkok'
+};
+
+export const CITY_TIME_ZONES: Record<City, string> = {
+  sh: 'Asia/Shanghai',
+  hk: 'Asia/Hong_Kong',
+  bkk: 'Asia/Bangkok'
+};
+
+export const LOCAL_LANG: Record<City, string> = {
+  sh: 'zh-Hans',
+  hk: 'zh-Hant',
+  bkk: 'th'
+};
+
+export const LOCAL_SCRIPT: Record<City, string> = {
+  sh: 'Chinese',
+  hk: 'Chinese',
+  bkk: 'Thai'
 };
 
 export const HOTELS: Record<City, Hotel> = {
@@ -72,23 +92,38 @@ export const HOTELS: Record<City, Hotel> = {
     zh: '香港皇悅卓越酒店',
     near: 'MTR · Tin Hau · Exit B',
     nights: '12 Dec'
+  },
+  bkk: {
+    short: 'Benjarong Hotel',
+    name: 'Benjarong Hotel Bangkok',
+    zh: '',
+    near: 'MRT Lat Phrao, about an 8 min walk',
+    nights: '13–15 Dec'
   }
 };
 
 export const TAXI_PHRASES: Record<City, { zh: string, en: string }> = {
   sh: { zh: '师傅，请带我们去这里。', en: 'Driver, please take us here.' },
-  hk: { zh: '唔該，我哋想去呢度。', en: 'Excuse me, we’d like to go here.' }
+  hk: { zh: '唔該，我哋想去呢度。', en: 'Excuse me, we’d like to go here.' },
+  bkk: { zh: 'กรุณาไปส่งที่นี่', en: 'Please take us here.' }
 };
 
 export const PREP: PrepItem[] = [
   { id: 'flight-pvg', title: 'Pudong flight time, Sat 12 Dec', why: 'The plan only says “go to PVG”, so we don’t know when to leave yet.' },
-  { id: 'flight-hkg', title: 'Flight home from Hong Kong, Sun 13 Dec', why: 'We want to be at the airport by 9:00.' },
+  { id: 'flight-hkg', title: 'Flight Hong Kong → Bangkok, Sun 13 Dec', why: 'At HKG by 9:00, landing at Suvarnabhumi 14:05.' },
   { id: 'disney', title: 'Disneyland tickets for Mon 7 Dec', why: 'We’re there from 7:00 until the night show.' },
   { id: 'hotel-zh', title: 'Shanghai hotel name in Chinese', why: 'For the taxi card. It’s on the booking.' },
   { id: 'metro', title: 'Metro QR in Alipay or WeChat', why: 'Every Shanghai day runs on the metro.' },
   { id: 'octopus', title: 'Octopus card for Hong Kong', why: 'For the MTR on Saturday.' },
-  { id: 'market', title: 'Rock Bund Christmas Market dates', why: 'Planned for Wed 9 Dec, 15:00–22:00.' }
+  { id: 'market', title: 'Rock Bund Christmas Market dates', why: 'Planned for Wed 9 Dec, 15:00–22:00.' },
+  { id: 'klai-spa', title: 'Book KLAI Thai Spa for Mon 14 Dec', why: 'Herbal inhaler workshop & Thai massage. They ask you to reserve in advance.' },
+  { id: 'grab', title: 'Grab app for Bangkok', why: 'Monday starts with a Grab after breakfast.' },
+  { id: 'hotel-th', title: 'Bangkok hotel name in Thai', why: 'For the taxi card. It’s on the booking.' },
+  { id: 'flight-bkk', title: 'Flight home from Bangkok, Sat 19 Dec', why: 'Add the time and which airport, so we know when to leave.' }
 ];
+
+// Checklist items added after phones had already saved a checklist; see useChecklist.
+export const PREP_ADDED_LATER = ['klai-spa', 'grab', 'hotel-th', 'flight-bkk'];
 
 export const TRIP_DAYS: TripDay[] = [
   {
@@ -301,15 +336,93 @@ export const TRIP_DAYS: TripDay[] = [
   {
     date: 13,
     weekday: 'Sun',
-    city: 'hk',
-    title: 'Homeward',
-    areas: 'Causeway Bay → Hong Kong Airport',
+    city: 'bkk',
+    title: 'Hello, Bangkok',
+    areas: 'Hong Kong → Suvarnabhumi · Sanam Chai · ICONSIAM',
     start: '07:00',
-    headsUp: 'We need to be at the airport by 9:00. Leave the hotel with time to spare.',
+    headsUp: 'Big travel day: at HKG by 9:00. Bangkok is an hour behind Hong Kong. The ferry to ICONSIAM is after 19:30, and it closes at 22:00.',
     items: [
-      hotel('Check out'),
+      hotel('Check out', '', 'hk'),
       leg('transfer', 'Hotel to the airport', 'how we get there isn’t in the plan yet'),
-      stop('Hong Kong International Airport', { zh: '香港國際機場', note: 'Be here by 9:00 · flight time to add', at: '9:00' })
+      stop('Hong Kong International Airport', { zh: '香港國際機場', note: 'Be here by 9:00', at: '9:00', city: 'hk' }),
+      leg('flight', 'Fly to Bangkok'),
+      stop('Suvarnabhumi Airport', { zh: 'ท่าอากาศยานสุวรรณภูมิ', note: 'We land at 14:05', at: '14:05' }),
+      hotel('Check in', '16:00'),
+      leg('metro', 'MRT Lat Phrao to Sanam Chai', 'Exit 1'),
+      stop('View ARUN Restaurant & Bar', { hours: '12:00-22:00' }),
+      leg('ferry', 'Ferry from Tha Tien Pier to ICONSIAM', 'after 19:30', '19:30'),
+      stop('ICONSIAM', { zh: 'ไอคอนสยาม', hours: '-22:00' }),
+      leg('metro', 'Metro back to the hotel'),
+      hotel('Home')
+    ]
+  },
+  {
+    date: 14,
+    weekday: 'Mon',
+    city: 'bkk',
+    title: 'Temples & Chinatown',
+    areas: 'Wat Arun · Wat Pho · Tha Tien · Talat Noi · Yaowarat',
+    start: '07:30',
+    headsUp: 'Temples ask for covered shoulders and knees. KLAI Thai Spa needs a booking in advance.',
+    items: [
+      hotel('Breakfast, then a Grab'),
+      leg('transfer', 'Grab', 'then MRT Itsaraphap, Exit 2'),
+      stop('Wat Arun', { zh: 'วัดอรุณราชวราราม', at: '8:00' }),
+      leg('ferry', 'Cross-river ferry', 'or MRT Sanam Chai, Exit 1'),
+      stop('Wat Pho', { zh: 'วัดโพธิ์', note: 'Temple of the Reclining Buddha' }),
+      stop('MITR STREET', { note: 'Lunch' }),
+      stop('Wat Pho Pier', { note: 'Riverside view of Wat Arun from the Bangkok side' }),
+      stop('After Sunrise Café', { note: 'Coffee break, about 30 min' }),
+      stop('WATAPO Flagship Store', { note: 'Tha Tien' }),
+      leg('metro', 'MRT to Hua Lamphong', 'Exit 1, then walk 12 min'),
+      stop('Talat Noi', { zh: 'ตลาดน้อย', note: 'Walk around & take photos' }),
+      leg('walk', 'Walk 8 min'),
+      stop('Song Wat Road', { zh: 'ถนนทรงวาด', note: 'Street art & trendy cafés' }),
+      stop('KLAI Thai Spa', { note: 'Herbal inhaler workshop & Thai massage · booked ahead' }),
+      stop('Chinatown (Yaowarat)', { zh: 'เยาวราช', note: 'Bangkok’s famous street food' }),
+      stop('HEX BAR', { note: 'Cocktails to end the night' }),
+      leg('metro', 'MRT from Wat Mangkon', 'back to the hotel'),
+      hotel('Home')
+    ]
+  },
+  {
+    date: 15,
+    weekday: 'Tue',
+    city: 'bkk',
+    title: 'Siam to Sukhumvit',
+    areas: 'Siam · Chidlom · Asok · Lat Phrao night market',
+    start: '10:00',
+    headsUp: 'Spectrum is best around sunset. The night market runs 16:00–00:00, so there’s no rush after dinner.',
+    items: [
+      leg('metro', 'BTS to Siam'),
+      stop('Siam Paragon', { zh: 'สยามพารากอน' }),
+      stop('Siam Square & Siam Center', { note: 'Walk around & take photos' }),
+      stop('CentralWorld', { zh: 'เซ็นทรัลเวิลด์' }),
+      leg('walk', 'Skywalk', 'to Chidlom'),
+      stop('Central Chidlom', { zh: 'เซ็นทรัล ชิดลม' }),
+      stop('Central Embassy', { note: 'Sesame Street Christmas decorations' }),
+      leg('metro', 'BTS to Asok'),
+      stop('Terminal 21 Asok', { zh: 'เทอร์มินอล 21 อโศก' }),
+      leg('walk', 'Walk 8 min'),
+      stop('Spectrum Lounge & Bar', { note: 'Sukhumvit 13 · dinner or sunset drinks with a city view' }),
+      leg('metro', 'BTS to Ha Yaek Lat Phrao', 'Exit 4', '21:00'),
+      stop('Liab Duan Night Market', { hours: '16:00-0:00', note: 'Dan Neramit' }),
+      hotel('Home')
+    ]
+  },
+  familyDay(16, 'Wed', 'Meeting the parents'),
+  familyDay(17, 'Thu', 'Family time'),
+  familyDay(18, 'Fri', 'Family time'),
+  {
+    date: 19,
+    weekday: 'Sat',
+    city: 'bkk',
+    title: 'Homeward',
+    areas: 'Bangkok → home',
+    start: '07:00',
+    headsUp: 'Add the flight time and which airport, so we know when to leave.',
+    items: [
+      stop('Airport departure', { note: 'Flight time & airport to add' })
     ]
   }
 ];
@@ -330,6 +443,19 @@ function stop (name: string, extra: Partial<Omit<Stop, 'kind' | 'name'>> = {}): 
   };
 }
 
-function hotel (note: string, at = ''): HotelStop {
-  return { kind: 'hotel', note, at };
+function hotel (note: string, at = '', city: City | null = null): HotelStop {
+  return { kind: 'hotel', note, at, city };
+}
+
+function familyDay (date: number, weekday: string, title: string): TripDay {
+  return {
+    date,
+    weekday,
+    city: 'bkk',
+    title,
+    areas: 'With the parents. No plan, on purpose.',
+    start: '10:00',
+    headsUp: '',
+    items: []
+  };
 }

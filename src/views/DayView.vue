@@ -46,6 +46,7 @@
     />
 
     <TimeControl
+      v-if="dayRoute.rows.length"
       class="mt-4"
       :minutes="minutes"
       :live="isLive"
@@ -64,7 +65,16 @@
       <span class="font-hand text-[23px] leading-hand">{{ day.headsUp }}</span>
     </p>
 
+    <p
+      v-if="!dayRoute.rows.length"
+      class="mt-8 rounded-3xl bg-card px-6 py-8 text-center"
+    >
+      <span class="block font-hand text-[30px] leading-tight text-accent-ink">nothing planned, just family</span>
+      <span class="mt-2 block text-[15px] text-muted">No route for this day.</span>
+    </p>
+
     <ol
+      v-else
       class="mt-6"
       aria-label="Today’s route"
     >
@@ -156,13 +166,15 @@ import { buildRoute } from '../lib/route';
 import type { StopRow } from '../lib/route';
 import skylineShanghai from '../assets/art/skyline-shanghai.png';
 import skylineHongKong from '../assets/art/skyline-hongkong.png';
+import skylineBangkok from '../assets/art/skyline-bangkok.png';
 import eggTart from '../assets/art/eggtart.png';
 import dimSum from '../assets/art/dimsum.png';
 import eggWaffle from '../assets/art/eggwaffle.png';
 
 const SKYLINES = {
   sh: skylineShanghai,
-  hk: skylineHongKong
+  hk: skylineHongKong,
+  bkk: skylineBangkok
 };
 
 const route = useRoute();

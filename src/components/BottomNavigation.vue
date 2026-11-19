@@ -75,61 +75,7 @@
         </button>
       </header>
 
-      <label
-        v-if="plans.length > 1"
-        class="grid gap-1 px-1 text-sm font-bold"
-      >
-        Current trip
-        <select
-          :value="activePlan.id"
-          class="min-h-11 w-full rounded-2xl border border-line bg-card px-3 text-base"
-          @change="selectPlan(($event.target as HTMLSelectElement).value)"
-        >
-          <option
-            v-for="trip in plans"
-            :key="trip.id"
-            :value="trip.id"
-          >{{ trip.title }}</option>
-        </select>
-      </label>
-
       <ul class="divide-y divide-line rounded-3xl bg-card px-4">
-        <li>
-          <RouterLink
-            :to="{ name: 'import' }"
-            class="flex min-h-[54px] items-center gap-3 font-bold"
-            @click="closeSettings"
-          >
-            <AppIcon
-              name="plus"
-              class="text-accent-ink"
-            />
-            <span class="flex-1">Import trip</span>
-            <AppIcon
-              name="forward"
-              :size="16"
-              class="text-muted"
-            />
-          </RouterLink>
-        </li>
-        <li v-if="activePlan.id !== ORIGINAL_ID">
-          <RouterLink
-            :to="editLink"
-            class="flex min-h-[54px] items-center gap-3 font-bold"
-            @click="closeSettings"
-          >
-            <AppIcon
-              name="edit"
-              class="text-accent-ink"
-            />
-            <span class="flex-1">Edit trip</span>
-            <AppIcon
-              name="forward"
-              :size="16"
-              class="text-muted"
-            />
-          </RouterLink>
-        </li>
         <li>
           <RouterLink
             :to="{ name: 'sync' }"
@@ -157,15 +103,11 @@
 import { computed, ref, useTemplateRef, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import AppIcon from './AppIcon.vue';
-import { usePlans } from '../composables/usePlans';
-import { ORIGINAL_ID } from '../lib/plan';
 
 const route = useRoute();
-const { activePlan, plans, selectPlan } = usePlans();
 const dialog = useTemplateRef<HTMLDialogElement>('settings');
 const expanded = ref(false);
 const daysActive = computed(() => route.name === 'days' || route.name === 'day');
-const editLink = computed(() => ({ name: 'import', query: { trip: activePlan.value.id } }));
 
 function openSettings () {
   dialog.value?.showModal();

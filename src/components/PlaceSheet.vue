@@ -46,7 +46,7 @@
           <button
             type="button"
             class="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full border-2 border-line px-4 text-sm font-bold"
-            @click="copyChinese"
+            @click="copyLocalName"
           >
             <AppIcon
               name="copy"
@@ -150,6 +150,7 @@ import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
 import { RouterLink } from 'vue-router';
 import AppIcon from './AppIcon.vue';
 import { appleMapsUrl, directionsLabel, directionsUrl } from '../lib/maps';
+import { LOCAL_LANG } from '../data/trip';
 import type { OpenTone } from '../lib/hours';
 import { hotelFor, hotelTarget, taxiLink } from '../lib/plan';
 import type { PlanDay, TripPlan } from '../lib/plan';
@@ -179,12 +180,12 @@ let copiedTimer: ReturnType<typeof setTimeout> | null = null;
 const copied = ref(false);
 const closeButton = useTemplateRef<HTMLButtonElement>('closeButton');
 
-const lang = computed(() => (props.row.place.city === 'hk' ? 'zh-Hant' : 'zh-Hans'));
+const lang = computed(() => (props.row.place.city === 'other' ? undefined : LOCAL_LANG[props.row.place.city]));
 const showZh = computed(() => Boolean(props.row.zh) && props.row.zh !== props.row.name);
 const taxiTarget = computed(() => (props.row.isHotel ? hotelTarget(props.day) : props.row.id));
 const canShowDriver = computed(() => Boolean(props.row.zh) || (props.row.isHotel && Boolean(hotelFor(props.plan, props.day))));
 
-async function copyChinese () {
+async function copyLocalName () {
   try {
     await navigator.clipboard.writeText(props.row.zh);
     copied.value = true;

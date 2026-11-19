@@ -1,4 +1,5 @@
 import { computed, ref } from 'vue';
+import { dayTimeZone } from '../lib/plan';
 import type { TripPlan } from '../lib/plan';
 
 const DAY_MS = 86_400_000;
@@ -22,10 +23,14 @@ export function useTripClock (trip: () => TripPlan) {
   return computed(() => {
     const plan = trip();
     const date = new Date(now.value);
-    const fields = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
-      timeZone: plan.timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+    const read = (timeZone: string) => Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+      timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
     }).formatToParts(date).map(({ type, value }) => [type, value]));
+    const guess = read(plan.timeZone);
+    // Days in another time zone (Bangkok is an hour behind Shanghai) are read in their own local time.
+    const zone = dayTimeZone(plan, plan.days.find(day => day.isoDate === `${guess.year}-${guess.month}-${guess.day}`));
+    const fields = zone === plan.timeZone ? guess : read(zone);
     const iso = previewMatch?.[1] ?? `${fields.year}-${fields.month}-${fields.day}`;
     let midnight = Date.parse(iso + 'T00:00Z');
     let minutes = Number(previewMatch?.[2] ?? fields.hour) * 60 + Number(previewMatch?.[3] ?? fields.minute);

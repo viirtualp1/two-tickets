@@ -48,6 +48,14 @@
   color-scheme: light;
 }
 
+:root[data-city="bkk"] {
+  --paper: #f0f6fd;
+  --tint: #d9e8f8;
+  --accent: #1f5f9e;
+  --accent-ink: #1a5490;
+  --line: #d5e3f2;
+}
+
 :root[data-city="hk"] {
   --paper: #f1f7f3;
   --tint: #d7ece2;

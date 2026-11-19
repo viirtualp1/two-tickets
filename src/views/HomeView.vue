@@ -75,7 +75,7 @@
           >
             <div>
               <dt class="text-[10px] font-bold tracking-[0.12em] text-muted uppercase">Route</dt>
-              <dd class="font-bold">SHA → HKG</dd>
+              <dd class="font-bold">SHA → HKG → BKK</dd>
             </div>
             <div>
               <dt class="text-[10px] font-bold tracking-[0.12em] text-muted uppercase">Lands</dt>
@@ -116,6 +116,7 @@ import { dayProgress } from '../lib/route';
 import appIcon from '../assets/icon.svg';
 import skylineShanghai from '../assets/art/skyline-shanghai.png';
 import skylineHongKong from '../assets/art/skyline-hongkong.png';
+import skylineBangkok from '../assets/art/skyline-bangkok.png';
 
 const { activePlan: plan } = usePlans();
 const clock = useTripClock(() => plan.value);
@@ -125,8 +126,9 @@ const firstDay = computed(() => plan.value.days[0]!);
 const lastDay = computed(() => plan.value.days.at(-1)!);
 const original = computed(() => plan.value.id === ORIGINAL_ID);
 const skyline = computed(() => {
-  const city = clock.value.phase === 'after' ? lastDay.value.city : firstDay.value.city;
-  return city === 'hk' ? skylineHongKong : city === 'sh' ? skylineShanghai : '';
+  const city = today.value?.city ?? (clock.value.phase === 'after' ? lastDay.value.city : firstDay.value.city);
+  const skylines: Record<string, string> = { sh: skylineShanghai, hk: skylineHongKong, bkk: skylineBangkok };
+  return skylines[city] ?? '';
 });
 const placesTogether = computed(() => plan.value.days.reduce((sum, day) => sum + dayProgress(day, visited.value).done, 0));
 const dateRange = computed(() => {

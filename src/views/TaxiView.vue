@@ -15,7 +15,7 @@
       <div class="flex flex-1 flex-col justify-center gap-5">
         <p
           v-if="card.place.zh"
-          :lang="card.place.city === 'other' ? undefined : lang"
+          :lang="lang"
           class="text-[54px] leading-hand font-extrabold tracking-wide"
         >
           {{ card.place.zh }}
@@ -65,7 +65,7 @@
           v-if="card.place.zh"
           type="button"
           class="inline-flex h-13 items-center justify-center gap-2 rounded-full border-2 border-line px-5 font-bold"
-          @click="copyChinese"
+          @click="copyLocalName"
         >
           <AppIcon
             name="copy"
@@ -89,7 +89,7 @@
 import { computed, onBeforeUnmount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import AppIcon from '../components/AppIcon.vue';
-import { TAXI_PHRASES } from '../data/trip';
+import { LOCAL_LANG, TAXI_PHRASES } from '../data/trip';
 import { useRoutePlan } from '../composables/usePlans';
 import type { Destination } from '../lib/plan';
 import { hasBackEntry } from '../lib/history';
@@ -135,7 +135,7 @@ const card = computed<TaxiCard | null>(() => {
 });
 
 const phrase = computed(() => card.value?.place.city === 'other' ? null : TAXI_PHRASES[card.value?.place.city ?? 'sh']);
-const lang = computed(() => (card.value?.place.city === 'hk' ? 'zh-Hant' : 'zh-Hans'));
+const lang = computed(() => (!card.value || card.value.place.city === 'other' ? undefined : LOCAL_LANG[card.value.place.city]));
 
 function goBack () {
   if (hasBackEntry()) {
@@ -146,7 +146,7 @@ function goBack () {
   router.push('/');
 }
 
-async function copyChinese () {
+async function copyLocalName () {
   if (!card.value?.place.zh) {
     return;
   }

@@ -12,7 +12,6 @@ export const router = createRouter({
     { path: '/day/:number', name: 'day', component: DayView },
     { path: '/taxi/:target', name: 'taxi', component: TaxiView },
     { path: '/sync', name: 'sync', component: () => import('./views/SyncView.vue') },
-    { path: '/import', name: 'import', component: () => import('./views/ImportView.vue') },
     { path: '/:pathMatch(.*)*', redirect: '/' }
   ],
   scrollBehavior (to, from, saved) {

@@ -15,7 +15,7 @@ export default defineConfig({
       manifest: {
         name: 'two tickets',
         short_name: 'two tickets',
-        description: 'Our pocket navigator for Shanghai & Hong Kong, 6–13 December 2026.',
+        description: 'Our pocket navigator for Shanghai, Hong Kong & Bangkok, 6–19 December 2026.',
         lang: 'en',
         start_url: './',
         scope: './',

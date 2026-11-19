@@ -16,6 +16,12 @@ import { useTripClock } from './composables/useTripClock';
 import { findPlace } from './lib/route';
 import type { Destination } from './lib/plan';
 
+const THEME_COLORS: Record<string, string> = {
+  sh: '#fff6f3',
+  hk: '#f1f7f3',
+  bkk: '#f0f6fd'
+};
+
 const route = useRoute();
 const { activePlan } = usePlans();
 const routePlan = useRoutePlan();
@@ -36,7 +42,8 @@ const city = computed<Destination>(() => {
       return routePlan.value?.days.find(day => day.id === target.slice(10))?.city ?? 'sh';
     }
     if (target.startsWith('hotel-')) {
-      return target === 'hotel-hk' ? 'hk' : 'sh';
+      const city = target.slice(6);
+      return city === 'hk' || city === 'bkk' ? city : 'sh';
     }
 
     return (routePlan.value && findPlace(target, routePlan.value)?.city) || 'sh';
@@ -47,6 +54,6 @@ const city = computed<Destination>(() => {
 
 watch(city, value => {
   document.documentElement.dataset.city = value;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', value === 'hk' ? '#f1f7f3' : '#fff6f3');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLORS[value] ?? '#fff6f3');
 }, { immediate: true });
 </script>

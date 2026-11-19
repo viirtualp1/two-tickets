@@ -1,4 +1,4 @@
-import { CITY_NAMES, HOTELS, TRIP_DAYS } from '../data/trip';
+import { CITY_NAMES, CITY_TIME_ZONES, HOTELS, TRIP_DAYS } from '../data/trip';
 import type { City, Hotel, RouteItem, TripDay } from '../data/trip';
 
 export type Destination = City | 'other';
@@ -22,7 +22,7 @@ export interface TripPlan {
 export const ORIGINAL_ID = 'shanghai-hong-kong-2026';
 export const originalPlan: TripPlan = {
   id: ORIGINAL_ID,
-  title: 'Shanghai & Hong Kong',
+  title: 'Shanghai, Hong Kong & Bangkok',
   timeZone: 'Asia/Shanghai',
   hotels: HOTELS,
   days: TRIP_DAYS.map((day, index) => ({
@@ -61,6 +61,14 @@ export function dayPosition (plan: TripPlan, key: string) {
 
 export function hotelFor (plan: TripPlan, day: PlanDay) {
   return day.hotel ?? plan.hotels[day.city];
+}
+
+export function hotelForItem (plan: TripPlan, day: PlanDay, item: RouteItem) {
+  return item.kind === 'hotel' && item.city ? plan.hotels[item.city] : hotelFor(plan, day);
+}
+
+export function dayTimeZone (plan: TripPlan, day: PlanDay | undefined) {
+  return day && day.city !== 'other' ? CITY_TIME_ZONES[day.city] : plan.timeZone;
 }
 
 export function hotelTarget (day: PlanDay) {

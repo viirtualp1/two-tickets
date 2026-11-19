@@ -12,7 +12,7 @@
           :key="day.id"
         >
           <li
-            v-if="original && index === 6"
+            v-if="index > 0 && day.city !== plan.days[index - 1]?.city"
             class="flex items-center gap-3 px-2 pt-3 text-muted"
             aria-hidden="true"
           >
@@ -21,7 +21,7 @@
               name="flight"
               :size="18"
             />
-            <span class="font-hand text-2xl leading-none">then Hong Kong</span>
+            <span class="font-hand text-2xl leading-none">then {{ day.cityName }}</span>
             <span class="h-0 flex-1 border-t-2 border-dotted border-muted/40" />
           </li>
           <li>

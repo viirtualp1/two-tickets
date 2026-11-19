@@ -1,4 +1,5 @@
-import { hotelFor, ORIGINAL_ID } from './plan';
+import { CITY_NAMES } from '../data/trip';
+import { hotelForItem, ORIGINAL_ID } from './plan';
 import type { Destination, PlanDay, TripPlan } from './plan';
 import { hoursLabel, openStatus } from './hours';
 import type { Leg, LegMode, RouteItem } from '../data/trip';
@@ -55,11 +56,11 @@ export function legSummary (item: Leg) {
 }
 
 export function placeFor (item: Exclude<RouteItem, Leg>, day: PlanDay, plan: TripPlan): Place {
-  const hotel = item.kind === 'hotel' ? hotelFor(plan, day) : undefined;
   if (item.kind === 'hotel') {
-    return { name: hotel?.name ?? item.note, zh: hotel?.zh ?? '', city: day.city, cityName: day.cityName };
+    const hotel = hotelForItem(plan, day, item);
+    return { name: hotel?.name ?? item.note, zh: hotel?.zh ?? '', city: item.city ?? day.city, cityName: item.city ? CITY_NAMES[item.city] : day.cityName };
   }
-  return { name: item.name, zh: item.zh, city: item.city ?? day.city, cityName: item.city ? item.city === 'hk' ? 'Hong Kong' : 'Shanghai' : day.cityName };
+  return { name: item.name, zh: item.zh, city: item.city ?? day.city, cityName: item.city ? CITY_NAMES[item.city] : day.cityName };
 }
 
 export function findPlace (id: string, plan: TripPlan) {
@@ -114,8 +115,8 @@ export function buildRoute (plan: TripPlan, day: PlanDay, minutes: number, visit
     const row: StopRow = {
       kind: 'stop',
       id,
-      name: item.kind === 'hotel' ? (hotelFor(plan, day)?.short ?? item.note) : item.name,
-      zh: item.kind === 'stop' ? item.zh : (hotelFor(plan, day)?.zh ?? ''),
+      name: item.kind === 'hotel' ? (hotelForItem(plan, day, item)?.short ?? item.note) : item.name,
+      zh: item.kind === 'stop' ? item.zh : (hotelForItem(plan, day, item)?.zh ?? ''),
       note: item.note,
       at: item.at,
       hours: hoursLabel(hours),

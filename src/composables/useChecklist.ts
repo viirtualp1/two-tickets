@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue';
-import { PREP } from '../data/trip';
+import { PREP, PREP_ADDED_LATER } from '../data/trip';
 import { legacyPrep } from './useProgress';
 import { ORIGINAL_ID, newId } from '../lib/plan';
 import { useWorkspace } from './useWorkspace';
@@ -41,8 +41,10 @@ for (const id of new Set([...PREP.map(item => item.id), ...legacyItems.keys()]))
     continue;
   }
   const item = legacyItems.get(id);
+  const addedLater = PREP.find(prep => prep.id === id && PREP_ADDED_LATER.includes(id));
   if (!item) {
-    initial[key] = null;
+    // A default missing from an older saved list was deleted, unless it was added to the plan after that list was saved.
+    initial[key] = addedLater ? { ...addedLater, done: false, reminderAt: null } : null;
   } else {
     const { notified, dismissed, ...shared } = item;
     initial[key] = shared;
@@ -53,6 +55,11 @@ for (const id of new Set([...PREP.map(item => item.id), ...legacyItems.keys()]))
       reminderFlags.value[flagKey(key, item.reminderAt, 'dismissed')] = true;
     }
   }
+}
+const hkgFlight = records.value[`todo:${ORIGINAL_ID}:flight-hkg`] as Partial<ChecklistItem> | null | undefined;
+const hkgDefault = PREP.find(item => item.id === 'flight-hkg');
+if (hkgFlight && hkgDefault && hkgFlight.title === 'Flight home from Hong Kong, Sun 13 Dec') {
+  initial[`todo:${ORIGINAL_ID}:flight-hkg`] = { ...hkgFlight, title: hkgDefault.title, why: hkgDefault.why };
 }
 if (Object.keys(initial).length) {
   put(initial);
